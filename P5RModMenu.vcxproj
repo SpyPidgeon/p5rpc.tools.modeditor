@@ -151,12 +151,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="encounterstructs.h" />
     <ClInclude Include="game_structs\battlestructs.h" />
+    <ClInclude Include="game_structs\encounterstructs.h" />
     <ClInclude Include="game_structs\filestructs.h" />
     <ClInclude Include="game_structs\guistructs.h" />
     <ClInclude Include="game_structs\itemstructs.h" />
     <ClInclude Include="game_structs\skillstructs.h" />
     <ClInclude Include="gui\displaystructwindow.h" />
+    <ClInclude Include="gui\encounterpanel.h" />
     <ClInclude Include="gui\filepanel.h" />
     <ClInclude Include="gui\flowscriptpanel.h" />
     <ClInclude Include="gui\imguistyling.h" />
@@ -187,6 +190,7 @@
     <ClCompile Include="game_structs\battlestructs.cpp" />
     <ClCompile Include="game_structs\guistructs.cpp" />
     <ClCompile Include="gui\displaystructwindow.cpp" />
+    <ClCompile Include="gui\encounterpanel.cpp" />
     <ClCompile Include="gui\filepanel.cpp" />
     <ClCompile Include="gui\flowscriptpanel.cpp" />
     <ClCompile Include="gui\imguistyling.cpp" />

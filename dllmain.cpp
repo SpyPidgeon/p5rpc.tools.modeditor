@@ -56,19 +56,14 @@ int WINAPI ModMenuMain()
         return 1;
     }
 
+    std::sort(panels.begin(), panels.end(), [](const Panel* a,const Panel* b)
+        {
+            return a->sortingPriority < b->sortingPriority;
+        });
+
     printf("Loaded mod\n");
-    ImGuiIO& io = ImGui::GetIO();
     SetImReflectConfig();
 
-    while (!quit)
-    {
-        Sleep(500);
-    }
-
-    printf("Mod exited\n");
-    io.Fonts->RemoveFont(windowFont);
-
-    ImGui::DestroyContext();
     return 0;
 }
 

@@ -5,6 +5,7 @@
 #include "skillstructs.h"
 #include "battlestructs.h"
 #include "filestructs.h"
+#include "encounterstructs.h"
 #include "panels.h"
 
 typedef DatUnit* (__stdcall* GetDatUnitByID)(uint16_t ID);

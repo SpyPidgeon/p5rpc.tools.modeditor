@@ -135,7 +135,7 @@ struct GFDItemNameInfo
 class ItemPanel : SearchablePanel, Exportable
 {
 public:
-    ItemPanel() { this->label = "Item Table"; }
+    ItemPanel() { this->label = "Item Table"; sortingPriority = 10; }
     static ItemPanel* GetInstance() { static ItemPanel* instance = new ItemPanel(); return instance; }
 
     void RenderLogic() override;

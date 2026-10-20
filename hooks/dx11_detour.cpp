@@ -66,11 +66,15 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	auto context = ImGui::GetCurrentContext();
+	ImGuiIO& io = ImGui::GetIO();
 
 	switch (uMsg)
 	{
 	case WM_QUIT:
-		quit = true;
+		printf("Mod exited\n");
+		io.Fonts->RemoveFont(windowFont);
+		ImGui::DestroyContext();
+		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 		break;
 	case WM_KILLFOCUS:
 	case WM_SIZE:

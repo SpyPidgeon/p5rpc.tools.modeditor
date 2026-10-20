@@ -13,7 +13,7 @@ enum class SkillTab
 class SkillPanel : SearchablePanel, Exportable
 {
 public:
-    SkillPanel() { this->label = "Skill Table"; }
+    SkillPanel() { this->label = "Skill Table"; sortingPriority = 10; }
 
     static SkillPanel* GetInstance()
     {

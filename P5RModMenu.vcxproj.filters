@@ -123,6 +123,15 @@
     <ClInclude Include="hooks\exportable.h">
       <Filter>Source Files\hooks</Filter>
     </ClInclude>
+    <ClInclude Include="encounterstructs.h">
+      <Filter>Source Files\game_structs</Filter>
+    </ClInclude>
+    <ClInclude Include="game_structs\encounterstructs.h">
+      <Filter>Source Files\game_structs</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\encounterpanel.h">
+      <Filter>Source Files\panels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -199,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="hooks\exportable.cpp">
       <Filter>Source Files\hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\encounterpanel.cpp">
+      <Filter>Source Files\panels</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

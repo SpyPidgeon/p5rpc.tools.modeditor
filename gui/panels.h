@@ -26,6 +26,7 @@ struct Panel
     const char* childLabel = "Inspector";
     bool open = false;
     int selectedIndex = 0;
+    uint16_t sortingPriority = 0;
     void RenderPanel();
 
     virtual void RenderLogic() {}

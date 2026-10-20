@@ -133,4 +133,8 @@ void SetImReflectConfig()
 	config.push<ItemType>()
 		.as_flags()
 		.pop();
+
+	config.push<EncounterFlags>()
+		.as_flags()
+		.pop();
 }
