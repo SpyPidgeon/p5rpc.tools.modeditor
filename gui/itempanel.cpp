@@ -1,6 +1,7 @@
 #include "itempanel.h"
 #include "signaturescan.h"
 #include <fstream>
+#include "skillpanel.h"
 
 void ItemPanel::ScanValues()
 {
@@ -115,12 +116,50 @@ void ItemPanel::RenderLogic()
 		RenderExplorer();
 }
 
+char skillSearchBuffer[256] = "\0";
+void tag_invoke(ImReflect::ImInput_t, const char* label, SkillID& value, ImSettings& settings, ImResponse& response)
+{
+	auto& skill_response = response.get<SkillID>();
+
+	std::string& currentValue = skillPanel->skillNames.at(value.skillID);
+	std::string preview = std::format("ID: {:03d} | {}", value.skillID, currentValue);
+
+	ImGui::SetNextWindowSizeConstraints(ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10), ImVec2(FLT_MAX, FLT_MAX));
+	if (ImGui::BeginCombo(label, preview.c_str()))
+	{
+		ImGui::InputText("Search", skillSearchBuffer, 256);
+
+		ImGui::BeginChild("##child", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10));
+		for (int i = 0; i < skillPanel->skillNames.size(); i++)
+		{
+			auto& currentName = skillPanel->skillNames.at(i);
+			bool is_selected = value.skillID == i;
+
+			std::string dispName = std::format("ID: {:03d} | {}", i, currentName);
+
+			if (skillSearchBuffer[0] != '\0' && !SearchablePanel::TextMatch(skillSearchBuffer, dispName))
+				continue;
+
+			if (ImGui::Selectable(dispName.c_str(), is_selected, 0))
+				value.skillID = i;
+
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndChild();
+
+		ImGui::EndCombo();
+	}
+
+	ImReflect::Detail::check_input_states(skill_response);
+}
+
 void ItemPanel::InspectorLogic()
 {
 	switch (selectedTab)
 	{
 	case ItemTab::Accessory:
-		ImReflect::Input("Accessory", items.accessories.at(selectedIndex),config);
+		ImReflect::Input(itemNames.accessory.at(selectedIndex).c_str(), items.accessories.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -129,7 +168,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::Armor:
-		ImReflect::Input("Armor", items.armors.at(selectedIndex),config);
+		ImReflect::Input(itemNames.armor.at(selectedIndex).c_str(), items.armors.at(selectedIndex),config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -138,7 +177,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::Consumable:
-		ImReflect::Input("Consumable", items.consumables.at(selectedIndex), config);
+		ImReflect::Input(itemNames.consumable.at(selectedIndex).c_str(), items.consumables.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -147,7 +186,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::KeyItem:
-		ImReflect::Input("Key Item", items.keyItems.at(selectedIndex), config);
+		ImReflect::Input(itemNames.keyItem.at(selectedIndex).c_str(), items.keyItems.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -156,7 +195,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::Treasure:
-		ImReflect::Input("Treasure", items.treasures.at(selectedIndex), config);
+		ImReflect::Input(itemNames.treasure.at(selectedIndex).c_str(), items.treasures.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -165,7 +204,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::Melee:
-		ImReflect::Input("Melee", items.melees.at(selectedIndex), config);
+		ImReflect::Input(itemNames.melee.at(selectedIndex).c_str(), items.melees.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -174,7 +213,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::Outfit:
-		ImReflect::Input("Outfit", items.outfits.at(selectedIndex), config);
+		ImReflect::Input(itemNames.outfit.at(selectedIndex).c_str(), items.outfits.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -183,7 +222,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::SkillCard:
-		ImReflect::Input("Skill Card", items.skillCards.at(selectedIndex), config);
+		ImReflect::Input(itemNames.skillCard.at(selectedIndex).c_str(), items.skillCards.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{
@@ -192,7 +231,7 @@ void ItemPanel::InspectorLogic()
 
 		break;
 	case ItemTab::RangedWeapon:
-		ImReflect::Input("Ranged Weapon", items.rangedWeapons.at(selectedIndex), config);
+		ImReflect::Input(itemNames.rangedWeapon.at(selectedIndex).c_str(), items.rangedWeapons.at(selectedIndex), config);
 
 		if (ImGui::Button("Apply To This"))
 		{

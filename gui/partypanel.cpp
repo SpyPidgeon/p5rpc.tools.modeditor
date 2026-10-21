@@ -38,6 +38,7 @@ void PartyPanel::ScanValues()
 }
 
 // Persona ID
+char personaSearchBuffer[256] = "\0";
 void tag_invoke(ImReflect::ImInput_t, const char* label, PersonaID& value, ImSettings& settings, ImResponse& response)
 {
 	auto& persona_response = response.get<PersonaID>();
@@ -53,8 +54,12 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, PersonaID& value, ImSet
 	else
 		valueName = "Error";
 
+	ImGui::SetNextWindowSizeConstraints(ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10), ImVec2(FLT_MAX, ImGui::GetFrameHeightWithSpacing() * 10));
 	if (ImGui::BeginCombo(label, valueName.c_str()))
 	{
+		ImGui::InputText("Search", personaSearchBuffer, 256);
+
+		ImGui::BeginChild("##child", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10));
 		for (int j = 0; j < partyPanel->personaNames.size(); j++)
 		{
 			bool is_selected = (j == value.id);
@@ -62,7 +67,10 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, PersonaID& value, ImSet
 			if (j == 0)
 				valueName = "Empty Slot";
 			else
-				valueName = "ID: " + std::to_string(j) + " | " + partyPanel->personaNames[j];
+				valueName = std::format("ID: {:03d} | {}", j, partyPanel->personaNames.at(j));
+
+			if (personaSearchBuffer[0] != '\0' && !SearchablePanel::TextMatch(personaSearchBuffer, valueName))
+				continue;
 
 			if (ImGui::Selectable(valueName.c_str(), is_selected))
 			{
@@ -72,7 +80,7 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, PersonaID& value, ImSet
 			if (is_selected)
 				ImGui::SetItemDefaultFocus();
 		}
-
+		ImGui::EndChild();
 		ImGui::EndCombo();
 	}
 
@@ -103,10 +111,11 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, DatUnit_Skills& value, 
 			else
 				valueName = format("{} Default", i);
 
+			ImGui::SetNextWindowSizeConstraints(ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10), ImVec2(FLT_MAX, FLT_MAX));
 			if (ImGui::BeginCombo(name.c_str(), valueName.c_str()))
 			{
 				ImGui::InputText("Search", skillSearch, 256);
-				ImGui::BeginChild("##separate",ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 5));
+				ImGui::BeginChild("##separate",ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10));
 
 				for (int j = 0; j < skillPanel->skillNames.size(); j++)
 				{

@@ -119,11 +119,12 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, BattleUnit& value, ImSe
 	std::string& currentValue = encounterPanel->enemyNames.at(value.unitID);
 	std::string preview = std::format("ID: {:03d} | {}",value.unitID,currentValue);
 
+	ImGui::SetNextWindowSizeConstraints(ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 10), ImVec2(FLT_MAX, FLT_MAX));
 	if (ImGui::BeginCombo(label, preview.c_str()))
 	{
 		ImGui::InputText("Search", unitSearchBuffer, 256);
 
-		ImGui::BeginChild("##child",ImVec2(0,ImGui::GetFrameHeightWithSpacing() * 5));
+		ImGui::BeginChild("##child",ImVec2(0,ImGui::GetFrameHeightWithSpacing() * 10));
 		for (int i = 0; i < encounterPanel->enemyNames.size(); i++)
 		{
 			auto& currentName = encounterPanel->enemyNames.at(i);
@@ -134,7 +135,7 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, BattleUnit& value, ImSe
 			if (unitSearchBuffer[0] != '\0' && !SearchablePanel::TextMatch(unitSearchBuffer, dispName))
 				continue;
 
-			if (ImGui::Selectable(dispName.c_str(), is_selected))
+			if (ImGui::Selectable(dispName.c_str(), is_selected,0))
 				value.unitID = i;
 
 			if (is_selected)

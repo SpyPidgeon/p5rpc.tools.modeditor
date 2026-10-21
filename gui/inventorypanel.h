@@ -40,7 +40,7 @@ struct InventoryType
 				continue;
 
 			int value = items[i];
-			ImGui::SliderInt(std::format("ID: {:03d} | {}", i, names[i]).c_str(), &value, 0, 99);
+			ImGui::SliderInt(std::format("{} | {}", i, names[i]).c_str(), &value, 0, 99);
 			items[i] = value;
 		}
 
