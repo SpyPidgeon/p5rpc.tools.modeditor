@@ -34,5 +34,7 @@ public:
 
 	std::array<ChallengeBattle, ChallengeBattle::CHALLENGE_COUNT> challenges;
 	std::array<ChallengeBattle, ChallengeBattle::CHALLENGE_COUNT>* challengesPTR;
+
+	std::array<std::string, 783> enemyNames;
 };
 static EncounterPanel* encounterPanel = EncounterPanel::GetInstance();

@@ -106,7 +106,7 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, DatUnit_Skills& value, 
 			if (ImGui::BeginCombo(name.c_str(), valueName.c_str()))
 			{
 				ImGui::InputText("Search", skillSearch, 256);
-				ImGui::BeginChild("##separate");
+				ImGui::BeginChild("##separate",ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 5));
 
 				for (int j = 0; j < skillPanel->skillNames.size(); j++)
 				{

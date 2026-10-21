@@ -151,7 +151,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="encounterstructs.h" />
     <ClInclude Include="game_structs\battlestructs.h" />
     <ClInclude Include="game_structs\encounterstructs.h" />
     <ClInclude Include="game_structs\filestructs.h" />

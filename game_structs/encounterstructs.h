@@ -131,6 +131,21 @@ struct EnemyEncounter
 IMGUI_REFLECT(EnemyEncounter, flags, field4, field6, battleUnits, majorFieldID, minorFieldID, musicID, enemyReplacementData, disasterShadowData,
 	field16, field17, field18, field19, field20);
 
+enum class PartySlot : uint16_t
+{
+	AnyOrNone,
+	Joker,
+	Ryuji,
+	Morgana,
+	Ann,
+	Yusuke,
+	Makoto,
+	Haru,
+	Futaba,
+	Akechi,
+	Kasumi
+};
+
 struct ForcedPartyData
 {
 	static void SwapBytes(std::array<ForcedPartyData, EnemyEncounter::ENCOUNTER_COUNT>* arr)
@@ -153,7 +168,7 @@ struct ForcedPartyData
 		}
 	}
 
-	std::array<uint16_t, 4> partySlot;
+	std::array<PartySlot, 4> partySlot;
 };
 IMGUI_REFLECT(ForcedPartyData, partySlot);
 
@@ -165,12 +180,18 @@ struct EncounterBonus
 };
 IMGUI_REFLECT(EncounterBonus, target, type, multiplier);
 
+struct ItemID
+{
+	uint16_t itemID;
+};
+IMGUI_REFLECT(ItemID,itemID);
+
 struct EncounterReward
 {
 	uint32_t requiredScore;
 	uint16_t _1;
 	uint16_t _2;
-	uint16_t itemID;
+	ItemID itemID;
 	uint16_t _3;
 };
 IMGUI_REFLECT(EncounterReward, requiredScore, itemID);

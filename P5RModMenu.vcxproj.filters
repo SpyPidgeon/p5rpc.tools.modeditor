@@ -123,9 +123,6 @@
     <ClInclude Include="hooks\exportable.h">
       <Filter>Source Files\hooks</Filter>
     </ClInclude>
-    <ClInclude Include="encounterstructs.h">
-      <Filter>Source Files\game_structs</Filter>
-    </ClInclude>
     <ClInclude Include="game_structs\encounterstructs.h">
       <Filter>Source Files\game_structs</Filter>
     </ClInclude>

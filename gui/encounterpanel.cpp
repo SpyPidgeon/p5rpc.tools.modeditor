@@ -1,6 +1,7 @@
 #include "encounterpanel.h"
 #include "signaturescan.h"
 #include <fstream>
+#include "itemstructs.h"
 
 void EncounterPanel::ScanValues()
 {
@@ -26,8 +27,14 @@ void EncounterPanel::ScanValues()
 	challengesPTR = (std::array<ChallengeBattle, ChallengeBattle::CHALLENGE_COUNT>*)challengesAddress;
 	challenges = *challengesPTR;
 
-	pattern = "48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 49 8B C8 48 89 05 ?? ?? ?? ?? 48 D1 E9 66 89 0D ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 66 3B 1D ?? ?? ?? ?? 44 8B C3 73 ?? 48 8B 05 ?? ?? ?? ?? 41 8B C8 41 FF C0 48 8D 14 ?? 0F B7 04 ?? 66 C1 C0 08 66 89 02 0F B7 05 ?? ?? ?? ?? 44 3B C0 72 ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 48 8B C8 48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 49 8B C8 48 89 05 ?? ?? ?? ?? 48 D1 E9 66 89 0D ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 66 3B 1D ?? ?? ?? ?? 44 8B C3 73 ?? 66 66 0F 1F 84 ?? 00 00 00 00 48 8B 05 ?? ?? ?? ?? 41 8B C8 41 FF C0 48 8D 14 ?? 0F B7 04 ?? 66 C1 C0 08 66 89 02 0F B7 05 ?? ?? ?? ?? 44 3B C0 72 ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 48 8B C8 48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 49 8B C8 48 89 05 ?? ?? ?? ?? 48 D1 E9 66 89 0D ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 66 3B 1D ?? ?? ?? ?? 44 8B C3 73 ?? 48 8B 05 ?? ?? ?? ?? 41 8B C8 41 FF C0 48 8D 14 ?? 0F B7 04 ?? 66 C1 C0 08 66 89 02 0F B7 05 ?? ?? ?? ?? 44 3B C0 72 ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 48 8B C8 48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 49 8B C8 48 89 05 ?? ?? ?? ?? 48 D1 E9 66 89 0D ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 66 3B 1D ?? ?? ?? ?? 44 8B C3 73 ?? 66 66 0F 1F 84 ?? 00 00 00 00 48 8B 05 ?? ?? ?? ?? 41 8B C8 41 FF C0 48 8D 14 ?? 0F B7 04 ?? 66 C1 C0 08 66 89 02 0F B7 05 ?? ?? ?? ?? 44 3B C0 72 ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 48 8B C8 48 89 05 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3 2B CA 85 C9 0F 4F C1 48 8D 4D ?? 48 03 45 ?? 48 03 F8 48 8B D7 E8 ?? ?? ?? ?? 8B 45 ?? 48 83 C7 04 0F C8 89 45 ?? 48 8B 4D ?? E8 ?? ?? ?? ?? 4C 8B 45 ?? 48 8B D7 49 8B C8 48 89 05 ?? ?? ?? ?? 48 D1 E9 66 89 0D ?? ?? ?? ?? 48 8B C8 E8 ?? ?? ?? ?? 66 3B 1D ?? ?? ?? ?? 44 8B C3 73 ?? 48 8B 05 ?? ?? ?? ?? 41 8B C8 41 FF C0 48 8D 14 ?? 0F B7 04 ?? 66 C1 C0 08 66 89 02 0F B7 05 ?? ?? ?? ?? 44 3B C0 72 ?? 8B 55 ?? 83 C2 04 8B C2 25 0F 00 00 80 7D ?? FF C8 83 C8 F0 FF C0 F7 D8 41 B8 04 00 00 00 8B C2 1B C9 83 E0 F0 83 E1 10 03 C8 8B C3";
+	pattern = "4C 03 05 ?? ?? ?? ?? EB ??";
+	DWORD_PTR enemyNamesAddress = PatternScan(GetModuleHandle(NULL), pattern);
+	enemyNamesAddress = *(DWORD_PTR*)GetAddressFromGlobalRef(enemyNamesAddress);
 
+	for (int i = 0; i < enemyNames.size(); i++)
+	{
+		enemyNames.at(i) = GetNameFromBinary(i, enemyNamesAddress);
+	}
 }
 
 void EncounterPanel::RenderLogic()
@@ -38,7 +45,11 @@ void EncounterPanel::RenderLogic()
 	{
 		if (ImGui::BeginTabItem("Encounters"))
 		{
-			tab = EncounterTab::ENCOUNTER;
+			if (tab != EncounterTab::ENCOUNTER)
+			{
+				tab = EncounterTab::ENCOUNTER;
+				selectedIndex = 0;
+			}
 			
 			for (int i = 0; i < EnemyEncounter::ENCOUNTER_COUNT; i++)
 			{
@@ -54,7 +65,11 @@ void EncounterPanel::RenderLogic()
 
 		if (ImGui::BeginTabItem("Forced Party Data"))
 		{
-			tab = EncounterTab::PARTY;
+			if (tab != EncounterTab::PARTY)
+			{
+				tab = EncounterTab::PARTY;
+				selectedIndex = 0;
+			}
 
 			for (int i = 0; i < EnemyEncounter::ENCOUNTER_COUNT; i++)
 			{
@@ -70,7 +85,11 @@ void EncounterPanel::RenderLogic()
 
 		if (ImGui::BeginTabItem("Challenges"))
 		{
-			tab = EncounterTab::CHALLENGE;
+			if (tab != EncounterTab::CHALLENGE)
+			{
+				tab = EncounterTab::CHALLENGE;
+				selectedIndex = 0;
+			}
 
 			for (int i = 0; i < ChallengeBattle::CHALLENGE_COUNT; i++)
 			{
@@ -92,13 +111,69 @@ void EncounterPanel::RenderLogic()
 		Exportable::RenderExplorer();
 }
 
+char unitSearchBuffer[256] = "\0";
 void tag_invoke(ImReflect::ImInput_t, const char* label, BattleUnit& value, ImSettings& settings, ImResponse& response)
 {
 	auto& unit_response = response.get<BattleUnit>();
 
+	std::string& currentValue = encounterPanel->enemyNames.at(value.unitID);
+	std::string preview = std::format("ID: {:03d} | {}",value.unitID,currentValue);
 
+	if (ImGui::BeginCombo(label, preview.c_str()))
+	{
+		ImGui::InputText("Search", unitSearchBuffer, 256);
 
-	if (ImGui::BeginCombo(label))
+		ImGui::BeginChild("##child",ImVec2(0,ImGui::GetFrameHeightWithSpacing() * 5));
+		for (int i = 0; i < encounterPanel->enemyNames.size(); i++)
+		{
+			auto& currentName = encounterPanel->enemyNames.at(i);
+			bool is_selected = value.unitID == i;
+
+			std::string dispName = std::format("ID: {:03d} | {}",i,currentName);
+
+			if (unitSearchBuffer[0] != '\0' && !SearchablePanel::TextMatch(unitSearchBuffer, dispName))
+				continue;
+
+			if (ImGui::Selectable(dispName.c_str(), is_selected))
+				value.unitID = i;
+
+			if (is_selected)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndChild();
+
+		ImGui::EndCombo();
+	}
+
+	ImReflect::Detail::check_input_states(unit_response);
+}
+
+// TODO: Finish dropdown system for Item IDs
+struct ItemOffsets
+{
+	const uint16_t item_Melee = 0;
+	const uint16_t item_Armor = 0x1000;
+	const uint16_t item_Accessory = 0x2000;
+	const uint16_t item_Consumable = 0x3000;
+	const uint16_t item_KeyItem = 0x4000;
+	const uint16_t item_Material = 0x5000;
+	const uint16_t item_SkillCard = 0x6000;
+	const uint16_t item_Outfit = 0x7000;
+	const uint16_t item_Ranged = 0x8000;
+};
+VISITABLE_STRUCT(ItemOffsets, item_Melee, item_Armor, item_Accessory, item_Consumable, item_KeyItem, item_Material, item_SkillCard, item_Outfit, item_Ranged);
+
+void tag_invoke(ImReflect::ImInput_t, const char* label, ItemID& value, ImSettings& settings, ImResponse& response)
+{
+	auto& item_response = response.get<ItemID>();
+
+	int newValue = (int)value.itemID;
+	if (ImGui::InputInt(label,&newValue))
+	{
+		value.itemID = newValue;
+	}
+
+	ImReflect::Detail::check_input_states(item_response);
 }
 
 void EncounterPanel::InspectorLogic()
@@ -109,18 +184,36 @@ void EncounterPanel::InspectorLogic()
 	{
 		std::string indexString = std::format("Encounter ID: {:03d}", selectedIndex);
 		ImReflect::Input(indexString.c_str(), enemyEncounters.at(selectedIndex),config);
+
+		if (ImGui::Button("Apply To This"))
+		{
+			enemyEncountersPTR->at(selectedIndex) = enemyEncounters.at(selectedIndex);
+		}
+
 		break;
 	}
 	case EncounterTab::PARTY:
 	{
 		std::string indexString = std::format("Encounter ID: {:03d}", selectedIndex);
 		ImReflect::Input(indexString.c_str(), forcedPartyData.at(selectedIndex),config);
+
+		if (ImGui::Button("Apply To This"))
+		{
+			forcedPartyDataPTR->at(selectedIndex) = forcedPartyData.at(selectedIndex);
+		}
+
 		break;
 	}
 	case EncounterTab::CHALLENGE:
 	{
 		std::string indexString = std::format("Challenge ID: {:03d}", selectedIndex);
 		ImReflect::Input(indexString.c_str(), challenges.at(selectedIndex),config);
+
+		if (ImGui::Button("Apply To This"))
+		{
+			challengesPTR->at(selectedIndex) = challenges.at(selectedIndex);
+		}
+
 		break;
 	}
 	}
