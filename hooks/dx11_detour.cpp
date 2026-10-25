@@ -80,10 +80,13 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	auto context = ImGui::GetCurrentContext();
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO* io = nullptr;
 
 	if (context != nullptr)
-		lockControls = io.WantTextInput;
+	{
+		io = &ImGui::GetIO();
+		lockControls = io->WantTextInput;
+	}
 	else
 		lockControls = false;
 
@@ -91,7 +94,10 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	{
 	case WM_QUIT:
 		printf("[P5R Mod Editor] Mod exited\n");
-		io.Fonts->RemoveFont(windowFont);
+
+		if (context != nullptr)
+			io->Fonts->RemoveFont(windowFont);
+
 		ImGui::DestroyContext();
 		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 		break;
