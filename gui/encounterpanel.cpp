@@ -2,6 +2,9 @@
 #include "signaturescan.h"
 #include <fstream>
 #include "itemstructs.h"
+#include <random>
+#include <algorithm>
+#include <utility>
 
 void EncounterPanel::ScanValues()
 {
@@ -232,6 +235,102 @@ void EncounterPanel::ApplyChanges()
 	*enemyEncountersPTR = enemyEncounters;
 	*forcedPartyDataPTR = forcedPartyData;
 	*challengesPTR = challenges;
+}
+
+using std::to_underlying;
+
+const std::unordered_set<int> excludedEnemies = { 66, 71, 79, 83, 86, 115, 116, 117, 118, 119, 120, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 188, 189, 191, 192, 193, 197, 198, 199, 200, 203, 204, 211, 216, 247, 248, 249, 250, 276, 296, 313, 332, 334, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422, 423, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 463, 467, 473, 509, 524, 564, 568, 570, 571, 572, 573, 691, 692, 693, 694, 695, 696, 697, 698, 699, 720, 721, 722, 723, 724 };
+
+const std::vector<std::pair<int, int>> battleFields = { {200,10},{250,1},{251,10},{251,2},{251,3},{251,4},{251,10},{252,1},{252,2},{252,3},{253,1},
+{253,2},{253,3},{253,10},{254,1},{254,2},{254,10},{255,1},{255,2},{255,3},{255,10},{256,1},{256,2},{256,3},{256,4},{256,10},{257,1},{257,2},{257,3},
+{257,4},{257,5},{257,6},{257,10},{259,1},{259,2},{259,3},{259,4},{259,10},{259,11},{259,12},{259,13},{259,14},{259,15},{260,1},{260,10},
+{260,11},{260,12},{260,13},{260,14},{261,1},{261,6},{262,1},{262,2},{262,3},{262,4},{262,5},{262,6},{262,7},{262,8},{262,9},{262,10},{262,11},
+{262,12},{262,13},{291,1},{292,1},{293,1},{294,1},{295,1},{295,10} };
+
+void EncounterPanel::RandomizeEncounters(const EncounterRandomSettings settings, const size_t seed)
+{
+	std::mt19937 rng(seed);
+
+	std::vector<int> filteredIndexes;
+
+	for (int i = 0; i < enemyEncounters.size(); i++)
+	{
+		auto& encounter = enemyEncounters[i];
+
+		if (to_underlying(encounter.flags) & (to_underlying(EncounterFlags::LoadBattleScript) | to_underlying(EncounterFlags::LoadBattleBFL)))
+			continue;
+
+		filteredIndexes.push_back(i);
+	}
+
+	std::vector<int> preShuffle = filteredIndexes;
+	std::shuffle(filteredIndexes.begin(), filteredIndexes.end(), rng);
+
+	std::vector<EnemyEncounter> copy;
+	copy.insert(copy.end(),std::begin(enemyEncounters),std::end(enemyEncounters));
+
+	for (int i = 0; i < filteredIndexes.size(); i++)
+	{
+		auto& n = enemyEncounters[filteredIndexes[i]];
+		auto& o = copy[preShuffle[i]];
+
+		o.battleUnits = n.battleUnits;
+
+		if (to_underlying(settings) & to_underlying(EncounterRandomSettings::RandomizeField))
+		{
+			int battleFieldSize = battleFields.size();
+			std::uniform_int_distribution dist(0, battleFieldSize);
+
+			auto& rngField = battleFields[dist(rng)];
+
+			o.majorFieldID = rngField.first;
+			o.minorFieldID = rngField.second;
+		}
+
+		if (to_underlying(settings) & to_underlying(EncounterRandomSettings::ShuffleDisasterShadows))
+		{
+			o.disasterShadowData = n.disasterShadowData;
+		}
+
+		if (to_underlying(settings) & to_underlying(EncounterRandomSettings::ShuffleReplacementShadows))
+		{
+			o.enemyReplacementData = n.enemyReplacementData;
+		}
+
+		if (to_underlying(settings) & to_underlying(EncounterRandomSettings::RandomizeEnemies))
+		{
+			for (int j = 0; j < o.battleUnits.size(); j++)
+			{
+				auto& unit = o.battleUnits[j];
+				std::uniform_int_distribution dist(0, 781);
+
+				int newID = dist(rng);
+
+				bool isInvalid = false;
+				if (excludedEnemies.contains(newID))
+					isInvalid = true;
+
+				while (isInvalid)
+				{
+					newID = dist(rng);
+
+					if (!excludedEnemies.contains(newID))
+					{
+						break;
+					}
+				}
+
+				if (unit.unitID != 0)
+				{
+					unit.unitID = newID;
+				}
+			}
+		}
+	}
+
+	std::memcpy(enemyEncounters.data(), copy.data(), sizeof(enemyEncounters));
+
+	*enemyEncountersPTR = enemyEncounters;
 }
 
 void EncounterPanel::ExportFile(const std::string& directory)

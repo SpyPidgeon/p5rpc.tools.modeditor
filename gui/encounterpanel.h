@@ -10,6 +10,20 @@ enum class EncounterTab
 	CHALLENGE
 };
 
+enum class EncounterRandomSettings : BYTE
+{
+	RandomizeEnemies = 1 << 0,
+	RandomizeField = 1 << 1,
+	ShuffleDisasterShadows = 1 << 2,
+	ShuffleReplacementShadows = 1 << 3
+};
+
+template<>
+struct magic_enum::customize::enum_range<EncounterRandomSettings>
+{
+	static constexpr bool is_flags = true;
+};
+
 class EncounterPanel : Panel, Exportable
 {
 public:
@@ -36,5 +50,7 @@ public:
 	std::array<ChallengeBattle, ChallengeBattle::CHALLENGE_COUNT>* challengesPTR;
 
 	std::array<std::string, 783> enemyNames;
+
+	void RandomizeEncounters(const EncounterRandomSettings settings, const size_t seed);
 };
 static EncounterPanel* encounterPanel = EncounterPanel::GetInstance();

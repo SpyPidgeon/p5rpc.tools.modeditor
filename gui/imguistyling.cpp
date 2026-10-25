@@ -1,4 +1,5 @@
 #include "imguistyling.h"
+#include "encounterpanel.h"
 
 constexpr ImVec4 UI_RED = ImVec4(1, 0, 0, 1);
 constexpr ImVec4 UI_WHITE = ImVec4(1, 1, 1, 1);
@@ -135,6 +136,9 @@ void SetImReflectConfig()
 		.pop();
 
 	config.push<EncounterFlags>()
+		.as_flags()
+		.pop();
+	config.push<EncounterRandomSettings>()
 		.as_flags()
 		.pop();
 }

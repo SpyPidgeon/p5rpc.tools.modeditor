@@ -1,4 +1,7 @@
 #include "quickpanel.h"
+#include "encounterpanel.h"
+#include <functional>
+#include <random>
 
 void QuickPanel::RenderLogic()
 {
@@ -18,8 +21,15 @@ void QuickPanel::RenderLogic()
 	{
 		selectedIndex = QuickSelection::QUICK_FUNCTIONS;
 	}
+
+	if (ImGui::Button("Randomizer"))
+	{
+		selectedIndex = QuickSelection::RANDOMIZER;
+	}
 }
 
+static EncounterRandomSettings encounterSettings;
+char seed[256] = "\0";
 void QuickPanel::InspectorLogic()
 {
 	switch (selectedIndex)
@@ -58,6 +68,37 @@ void QuickPanel::InspectorLogic()
 			CallField();
 		}
 		break;
+
+	case QuickSelection::RANDOMIZER:
+	{
+		ImGui::TextWrapped("Warning: This is experimental and can cause softlocks, hardlocks, and crashes. Use at your own risk.");
+		ImGui::Spacing();
+
+		ImGui::InputText("Seed", seed, 256);
+		ImGui::SeparatorText("Encounter");
+
+		ImReflect::Input("Encounter Settings", encounterSettings, config);
+		ImGui::TextWrapped("Warning: Randomizing enemies may cause crashes if you do not have Custom Bonus Tweaks!");
+		ImGui::Spacing();
+
+		if (ImGui::Button("Randomize Encounters"))
+		{
+			size_t hash = 0;
+
+			if (seed[0] != '\0')
+				hash = std::hash<std::string_view>{}(std::string_view(seed, 256));
+			else
+			{
+				hash = static_cast<size_t>(std::random_device{}());
+			}
+
+			encounterPanel->RandomizeEncounters(encounterSettings, hash);
+		}
+
+		ImGui::Separator();
+
+		break;
+	}
 	}
 }
 

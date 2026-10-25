@@ -28,7 +28,8 @@ enum QuickSelection
 {
 	TELEPORT,
 	NOCLIP,
-	QUICK_FUNCTIONS
+	QUICK_FUNCTIONS,
+	RANDOMIZER
 };
 
 struct CallFieldParams
