@@ -4,6 +4,19 @@
 
 extern HMODULE dll_handle;
 
+HWND GetFocusedWindow()
+{
+	GUITHREADINFO guiInfo = {};
+	guiInfo.cbSize = sizeof(guiInfo);
+
+	if (!GetGUIThreadInfo(0, &guiInfo) || !guiInfo.hwndFocus)
+	{
+		return GetForegroundWindow();
+	}
+
+	return guiInfo.hwndFocus;
+}
+
 typedef long(__stdcall* present)(IDXGISwapChain*, UINT, UINT);
 present p_present;
 present p_present_target;
@@ -14,7 +27,7 @@ bool get_present_pointer()
 	sd.BufferCount = 2;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = GetForegroundWindow();
+	sd.OutputWindow = GetFocusedWindow();
 	sd.SampleDesc.Count = 1;
 	sd.Windowed = TRUE;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -62,11 +75,17 @@ ID3D11RenderTargetView* mainRenderTargetView = NULL;
 WNDPROC oWndProc;
 ImFont* windowFont;
 bool quit = false;
+bool lockControls = false;
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	auto context = ImGui::GetCurrentContext();
 	ImGuiIO& io = ImGui::GetIO();
+
+	if (context != nullptr)
+		lockControls = io.WantTextInput;
+	else
+		lockControls = false;
 
 	switch (uMsg)
 	{
@@ -154,7 +173,7 @@ static long __stdcall detour_present(IDXGISwapChain* p_swap_chain, UINT sync_int
 			DXGI_SWAP_CHAIN_DESC sd;
 			p_swap_chain->GetDesc(&sd);
 
-			window = sd.OutputWindow;
+			window = GetFocusedWindow();
 			ID3D11Texture2D* pBackBuffer;
 			p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 

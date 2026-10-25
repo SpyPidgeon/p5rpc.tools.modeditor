@@ -2,6 +2,7 @@
 #include "flowscriptpanel.h"
 
 GetDatUnitByID GetDatUnit;
+FldPCMoveUpdate oMoveUpdate;
 
 std::string GetNameFromBinary(const uint32_t currentIndex, const uintptr_t nameAddress)
 {
@@ -36,4 +37,13 @@ void MouseStateHook()
 		return;
 
 	oMouseState();
+}
+
+extern bool lockControls;
+void FldPCMoveUpdateHook(uintptr_t param1, float param2)
+{
+	if (lockControls)
+		return;
+
+	oMoveUpdate(param1,param2);
 }

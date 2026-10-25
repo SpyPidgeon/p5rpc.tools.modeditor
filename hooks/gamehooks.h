@@ -14,3 +14,7 @@ extern GetDatUnitByID GetDatUnit;
 typedef void(__stdcall* MouseState)();
 extern MouseState oMouseState;
 void MouseStateHook();
+
+typedef void(__stdcall* FldPCMoveUpdate)(uintptr_t param1, float param2);
+extern FldPCMoveUpdate oMoveUpdate;
+void FldPCMoveUpdateHook(uintptr_t param1, float param2);

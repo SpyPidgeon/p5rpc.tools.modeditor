@@ -30,9 +30,13 @@ void InitScan()
     pattern = "48 8B C4 48 81 EC 98 00 00 00 80 3D ? ? ? ? 00";
     oMouseState = (MouseState)PatternScan(GetModuleHandle(NULL), pattern);
 
+    pattern = "40 53 48 83 EC 50 48 8B 59 ?? 0F 29 74 24 ?? 0F 28 F1";
+    oMoveUpdate = (FldPCMoveUpdate)PatternScan(GetModuleHandle(NULL), pattern);
+
     DetourTransactionBegin();
     DetourUpdateThread(GetCurrentThread());
     DetourAttach(&(PVOID&)oMouseState, MouseStateHook);
+    DetourAttach(&(PVOID&)oMoveUpdate, FldPCMoveUpdateHook);
     DetourTransactionCommit();
 }
 
