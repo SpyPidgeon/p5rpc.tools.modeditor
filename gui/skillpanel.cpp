@@ -1,5 +1,8 @@
 #include "skillpanel.h"
 #include "signaturescan.h"
+#include <random>
+#include <algorithm>
+#include <utility>
 
 using std::format;
 
@@ -201,6 +204,56 @@ void SkillPanel::Refresh()
 	skillElementArray = *skillElementPtr;
 	technicalArray = *technicalPtr;
 	traitsArray = *traitsPtr;
+}
+
+void SkillPanel::RandomizeSkills(const size_t seed)
+{
+	std::mt19937 rng(seed);
+
+	std::vector<int> filteredIndexes;
+
+	for (int i = 1; i < 779; i++)
+	{
+		if (i <= 289 && i >= 280)
+			continue;
+
+		auto& skill = activeSkillArray[i];
+		auto& element = skillElementArray[i];
+
+		if (skill.casterEffect2 == CasterEffect2::UnknownCasterEffect_CRASH_WARNING || skill.casterEffect2 == CasterEffect2::SummonAlly_CRASH_WARNING)
+			continue;
+
+		if (element.skillType == ElementSkillType::NULLSkill || element.skillType == ElementSkillType::Passive)
+			continue;
+
+		filteredIndexes.push_back(i);
+	}
+
+	std::vector<int> preShuffle = filteredIndexes;
+	std::shuffle(filteredIndexes.begin(), filteredIndexes.end(),rng);
+
+	std::vector<ActiveSkill> copySkill;
+	copySkill.insert(copySkill.end(), std::begin(activeSkillArray), std::end(activeSkillArray));
+
+	std::vector<SkillElement> copyElement;
+	copyElement.insert(copyElement.end(), std::begin(skillElementArray), std::end(skillElementArray));
+
+	for (int i = 0; i < filteredIndexes.size(); i++)
+	{
+		auto& n = activeSkillArray[filteredIndexes[i]];
+		auto& n2 = skillElementArray[filteredIndexes[i]];
+		auto& o = copySkill[preShuffle[i]];
+		auto& o2 = copyElement[preShuffle[i]];
+
+		o = n;
+		o2 = n2;
+	}
+
+	std::memcpy(activeSkillArray.data(), copySkill.data(), sizeof(activeSkillArray));
+	std::memcpy(skillElementArray.data(), copyElement.data(), sizeof(skillElementArray));
+
+	*activeSkillsPTR = activeSkillArray;
+	*skillElementPtr = skillElementArray;
 }
 
 void SkillPanel::ExportFile(const std::string& directory)

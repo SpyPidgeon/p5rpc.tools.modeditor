@@ -58,6 +58,8 @@ public:
     std::array<Trait, TRAIT_SIZE> traitsArray;
     std::array<std::string, TRAIT_SIZE> traitNamesArray;
 
+    void RandomizeSkills(const size_t seed);
+
 private:
     SkillTab tab = SkillTab::ACTIVE;
 };

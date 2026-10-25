@@ -345,8 +345,8 @@ enum class Elements : uint8_t
 
 enum class ElementSkillType : uint8_t
 {
-	Passive,
 	Active,
+	Passive,
 	NULLSkill = 255
 };
 

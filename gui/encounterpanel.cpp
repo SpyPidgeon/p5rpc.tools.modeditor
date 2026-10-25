@@ -378,11 +378,11 @@ void EncounterPanel::ExportFile(const std::string& directory)
 	if (!file.is_open())
 	{
 		DWORD error = GetLastError();
-		printf("File failed to write! Error Code: 0x%x\n", error);
+		printf("[P5R Mod Editor] File failed to write! Error Code: 0x%x\n", error);
 		return;
 	}
 
 	file.write((const char*)fileBytes.data(), fileBytes.size());
 	file.close();
-	printf("Successfully wrote to %s\n", directory.c_str());
+	printf("[P5R Mod Editor] Successfully wrote to %s\n", directory.c_str());
 }

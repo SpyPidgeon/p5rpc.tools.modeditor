@@ -52,7 +52,7 @@ int WINAPI ModMenuMain()
 
     if (!DX11Hook())
     {
-        printf("Failed to hook dx11\n");
+        printf("[P5R Mod Editor] Failed to hook dx11\n");
         return 1;
     }
 
@@ -61,7 +61,7 @@ int WINAPI ModMenuMain()
             return a->sortingPriority < b->sortingPriority;
         });
 
-    printf("Loaded mod\n");
+    printf("[P5R Mod Editor] Loaded Mod Editor\n");
     SetImReflectConfig();
 
     return 0;

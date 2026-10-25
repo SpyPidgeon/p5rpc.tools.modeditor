@@ -1,5 +1,6 @@
 #include "quickpanel.h"
 #include "encounterpanel.h"
+#include "skillpanel.h"
 #include <functional>
 #include <random>
 
@@ -96,6 +97,27 @@ void QuickPanel::InspectorLogic()
 		}
 
 		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::SeparatorText("Skill");
+		ImGui::TextWrapped("This only shuffles active skills, it skips passives and null skills and does not change the particle effects.");
+		ImGui::Spacing();
+
+		if (ImGui::Button("Randomize Skills"))
+		{
+			size_t hash = 0;
+
+			if (seed[0] != '\0')
+				hash = std::hash<std::string_view>{}(std::string_view(seed, 256));
+			else
+			{
+				hash = static_cast<size_t>(std::random_device{}());
+			}
+
+			skillPanel->RandomizeSkills(hash);
+		}
+
+		ImGui::Separator();
 
 		break;
 	}
@@ -114,7 +136,7 @@ void QuickPanel::SavePosition()
 	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_GET_Z_TRANSLATE, reshnd);
 	float z = GET_RETURN_FLOAT();
 
-	printf("Saved Position: %f, %f, %f\n", x, y, z);
+	printf("[P5R Mod Editor] Saved Position: %f, %f, %f\n", x, y, z);
 	teleport = Vector3(x, y, z);
 }
 

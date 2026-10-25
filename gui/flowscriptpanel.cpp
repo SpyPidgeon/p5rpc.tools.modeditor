@@ -112,7 +112,7 @@ FlowScript* FlowScriptPanel::GetFunctionByName(const char* name)
 		}
 	}
 
-	printf("GetFunctionByName returned nullptr!\n");
+	printf("[P5R Mod Editor] GetFunctionByName returned nullptr!\n");
 	return nullptr;
 }
 
@@ -133,7 +133,7 @@ void FlowScriptPanel::RunFlowScript(FlowScript* flowObject, std::vector<float> a
 
 	if (args.size() > 8)
 	{
-		printf("RunFlowScript: Too many arguments!");
+		printf("[P5R Mod Editor] RunFlowScript: Too many arguments!");
 		return;
 	}
 

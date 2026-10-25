@@ -47,7 +47,7 @@ bool get_present_pointer()
 	}
 	else
 	{
-		printf("Failed with reason: 0x%x\n", result);
+		printf("[P5R Mod Editor] Failed to hook DX11 with reason: 0x%x\n", result);
 	}
 	return false;
 }
@@ -71,7 +71,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	switch (uMsg)
 	{
 	case WM_QUIT:
-		printf("Mod exited\n");
+		printf("[P5R Mod Editor] Mod exited\n");
 		io.Fonts->RemoveFont(windowFont);
 		ImGui::DestroyContext();
 		return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
@@ -133,7 +133,6 @@ int GetWindowHeight(HWND window)
 
 	if (GetWindowRect(window, &rect))
 	{
-		printf("Window Size: %i\n", rect.bottom - rect.top);
 		return rect.bottom - rect.top;
 	}
 
