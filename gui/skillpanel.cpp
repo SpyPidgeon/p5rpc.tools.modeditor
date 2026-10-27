@@ -220,7 +220,8 @@ void SkillPanel::RandomizeSkills(const size_t seed)
 		auto& skill = activeSkillArray[i];
 		auto& element = skillElementArray[i];
 
-		if (skill.casterEffect2 == CasterEffect2::UnknownCasterEffect_CRASH_WARNING || skill.casterEffect2 == CasterEffect2::SummonAlly_CRASH_WARNING)
+		if (skill.casterEffect2 == CasterEffect2::UnknownCasterEffect_CRASH_WARNING || skill.casterEffect2 == CasterEffect2::SummonAlly_CRASH_WARNING
+			|| skill.casterEffect2 == CasterEffect2::MeleeContact || skill.casterEffect2 == CasterEffect2::SupportRelated)
 			continue;
 
 		if (element.skillType == ElementSkillType::NULLSkill || element.skillType == ElementSkillType::Passive)

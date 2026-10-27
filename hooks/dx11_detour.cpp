@@ -4,18 +4,7 @@
 
 extern HMODULE dll_handle;
 
-HWND GetFocusedWindow()
-{
-	GUITHREADINFO guiInfo = {};
-	guiInfo.cbSize = sizeof(guiInfo);
-
-	if (!GetGUIThreadInfo(0, &guiInfo) || !guiInfo.hwndFocus)
-	{
-		return GetForegroundWindow();
-	}
-
-	return guiInfo.hwndFocus;
-}
+HWND gameWindow = NULL;
 
 typedef long(__stdcall* present)(IDXGISwapChain*, UINT, UINT);
 present p_present;
@@ -27,7 +16,7 @@ bool get_present_pointer()
 	sd.BufferCount = 2;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = GetFocusedWindow();
+	sd.OutputWindow = gameWindow;
 	sd.SampleDesc.Count = 1;
 	sd.Windowed = TRUE;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
@@ -179,7 +168,11 @@ static long __stdcall detour_present(IDXGISwapChain* p_swap_chain, UINT sync_int
 			DXGI_SWAP_CHAIN_DESC sd;
 			p_swap_chain->GetDesc(&sd);
 
-			window = GetFocusedWindow();
+			if (sd.OutputWindow != gameWindow)
+				return  p_present(p_swap_chain, sync_interval, flags);
+
+			window = gameWindow;
+
 			ID3D11Texture2D* pBackBuffer;
 			p_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
