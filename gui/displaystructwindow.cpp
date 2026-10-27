@@ -3,7 +3,7 @@
 
 extern ImSettings config;
 
-const char* windowName = "SpyPigeon's Mod Editor Prerelease Version 0.4.1";
+const char* windowName = "SpyPigeon's Mod Editor Prerelease Version 0.4.2";
 
 void RenderStructWidgets()
 {
