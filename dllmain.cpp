@@ -74,8 +74,9 @@ void InitScan()
 
     Exportable::currentDirectory = GetDLLPath("");
 
-    pattern = "48 8B C4 48 81 EC 98 00 00 00 80 3D ? ? ? ? 00";
-    oMouseState = (MouseState)PatternScan(GetModuleHandle(NULL), pattern);
+    pattern = "E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 85 C0 74 ?? FF D0";
+    DWORD_PTR MouseStateAddress = PatternScan(GetModuleHandle(NULL), pattern);
+    oMouseState = (MouseState)GetAddressFromFuncCall(MouseStateAddress);
 
     pattern = "48 8B 8D ?? ?? ?? ?? 0F 28 CF 48 81 8D ?? ?? ?? ?? 80 00 00 00";
     DWORD_PTR moveUpdateCall = PatternScan(GetModuleHandle(NULL), pattern);

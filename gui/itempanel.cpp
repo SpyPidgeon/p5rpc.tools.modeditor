@@ -2,6 +2,9 @@
 #include "signaturescan.h"
 #include <fstream>
 #include "skillpanel.h"
+#include <random>
+#include <algorithm>
+#include <utility>
 
 void ItemPanel::ScanValues()
 {
@@ -266,6 +269,66 @@ void ItemPanel::ApplyChanges()
 	*itemPtrs.rangedWeapons = items.rangedWeapons;
 	*itemPtrs.skillCards = items.skillCards;
 	*itemPtrs.treasures = items.treasures;
+}
+
+void ItemPanel::RandomizeConsumables(const size_t seed, const bool randomize)
+{
+	std::mt19937 rng(seed);
+
+	std::vector<Consumable> consumableCopy;
+	consumableCopy.insert(consumableCopy.end(), items.consumables.begin(), items.consumables.end());
+
+	if (randomize)
+	{
+		for (auto& consumable : consumableCopy)
+		{
+			std::uniform_int_distribution dist(1, 779);
+			int newID = dist(rng);
+
+			if (consumable.icon != ItemType::Consumable)
+				continue;
+
+			if (!skillPanel->SkillFilter(newID))
+			{
+				while (true)
+				{
+					newID = dist(rng);
+
+					if (skillPanel->SkillFilter(newID))
+						break;
+				}
+
+				consumable.skill.skillID = newID;
+			}
+		}
+	}
+	else
+	{
+		std::vector<int> filteredIndexes;
+
+		for (int i = 0; i < items.consumables.size(); i++)
+		{
+			auto& consumable = items.consumables[i];
+			if (skillPanel->SkillFilter(consumable.skill.skillID))
+			{
+				filteredIndexes.push_back(i);
+			}
+		}
+
+		std::vector<int> preShuffle = filteredIndexes;
+		std::shuffle(filteredIndexes.begin(), filteredIndexes.end(), rng);
+
+		for (int i = 0; i < filteredIndexes.size(); i++)
+		{
+			auto& n = items.consumables[filteredIndexes[i]];
+			auto& o = consumableCopy[preShuffle[i]];
+
+			o.skill = n.skill;
+		}
+	}
+
+	std::memcpy(items.consumables.data(), consumableCopy.data(), sizeof(items.consumables));
+	*itemPtrs.consumables = items.consumables;
 }
 
 void ItemPanel::ExportFile(const std::string& directory)

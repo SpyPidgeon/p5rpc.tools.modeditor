@@ -59,6 +59,7 @@ public:
     std::array<std::string, TRAIT_SIZE> traitNamesArray;
 
     void RandomizeSkills(const size_t seed);
+    bool SkillFilter(const int id);
 
 private:
     SkillTab tab = SkillTab::ACTIVE;

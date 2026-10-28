@@ -1,6 +1,7 @@
 #include "quickpanel.h"
 #include "encounterpanel.h"
 #include "skillpanel.h"
+#include "itempanel.h"
 #include <functional>
 #include <random>
 
@@ -31,6 +32,7 @@ void QuickPanel::RenderLogic()
 
 static EncounterRandomSettings encounterSettings;
 char seed[256] = "\0";
+size_t currentHash = static_cast<size_t>(std::random_device{}());
 void QuickPanel::InspectorLogic()
 {
 	switch (selectedIndex)
@@ -75,7 +77,15 @@ void QuickPanel::InspectorLogic()
 		ImGui::TextWrapped("Warning: This is experimental and can cause softlocks, hardlocks, and crashes. Use at your own risk.");
 		ImGui::Spacing();
 
-		ImGui::InputText("Seed", seed, 256);
+		if (ImGui::InputText("Seed", seed, 256))
+		{
+			if (seed[0] != '\0')
+				currentHash = std::hash<std::string_view>{}(std::string_view(seed, 256));
+			else
+			{
+				currentHash = static_cast<size_t>(std::random_device{}());
+			}
+		}
 		ImGui::SeparatorText("Encounter");
 
 		ImReflect::Input("Encounter Settings", encounterSettings, config);
@@ -84,16 +94,7 @@ void QuickPanel::InspectorLogic()
 
 		if (ImGui::Button("Randomize Encounters"))
 		{
-			size_t hash = 0;
-
-			if (seed[0] != '\0')
-				hash = std::hash<std::string_view>{}(std::string_view(seed, 256));
-			else
-			{
-				hash = static_cast<size_t>(std::random_device{}());
-			}
-
-			encounterPanel->RandomizeEncounters(encounterSettings, hash);
+			encounterPanel->RandomizeEncounters(encounterSettings, currentHash);
 		}
 
 		ImGui::Separator();
@@ -105,19 +106,24 @@ void QuickPanel::InspectorLogic()
 
 		if (ImGui::Button("Randomize Skills"))
 		{
-			size_t hash = 0;
-
-			if (seed[0] != '\0')
-				hash = std::hash<std::string_view>{}(std::string_view(seed, 256));
-			else
-			{
-				hash = static_cast<size_t>(std::random_device{}());
-			}
-
-			skillPanel->RandomizeSkills(hash);
+			skillPanel->RandomizeSkills(currentHash);
 		}
 
 		ImGui::Separator();
+		ImGui::Spacing();
+
+		ImGui::SeparatorText("Item");
+
+		static bool randomizeItems = false;
+		ImGui::Checkbox("Randomize Consumable Skill", &randomizeItems);
+
+		if (ImGui::Button("Randomize Consumables"))
+		{
+			itemPanel->RandomizeConsumables(currentHash, randomizeItems);
+		}
+
+		ImGui::Separator();
+		ImGui::Spacing();
 
 		break;
 	}

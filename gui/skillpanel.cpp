@@ -206,6 +206,24 @@ void SkillPanel::Refresh()
 	traitsArray = *traitsPtr;
 }
 
+bool SkillPanel::SkillFilter(const int id)
+{
+	if (id <= 289 && id >= 280)
+		return false;
+
+	auto& skill = activeSkillArray[id];
+	auto& element = skillElementArray[id];
+
+	if (skill.casterEffect2 == CasterEffect2::UnknownCasterEffect_CRASH_WARNING || skill.casterEffect2 == CasterEffect2::SummonAlly_CRASH_WARNING
+		|| skill.casterEffect2 == CasterEffect2::MeleeContact || skill.casterEffect2 == CasterEffect2::SupportRelated)
+		return false;
+
+	if (element.skillType == ElementSkillType::NULLSkill || element.skillType == ElementSkillType::Passive)
+		return false;
+
+	return true;
+}
+
 void SkillPanel::RandomizeSkills(const size_t seed)
 {
 	std::mt19937 rng(seed);
@@ -214,17 +232,7 @@ void SkillPanel::RandomizeSkills(const size_t seed)
 
 	for (int i = 1; i < 779; i++)
 	{
-		if (i <= 289 && i >= 280)
-			continue;
-
-		auto& skill = activeSkillArray[i];
-		auto& element = skillElementArray[i];
-
-		if (skill.casterEffect2 == CasterEffect2::UnknownCasterEffect_CRASH_WARNING || skill.casterEffect2 == CasterEffect2::SummonAlly_CRASH_WARNING
-			|| skill.casterEffect2 == CasterEffect2::MeleeContact || skill.casterEffect2 == CasterEffect2::SupportRelated)
-			continue;
-
-		if (element.skillType == ElementSkillType::NULLSkill || element.skillType == ElementSkillType::Passive)
+		if (!SkillFilter(i))
 			continue;
 
 		filteredIndexes.push_back(i);

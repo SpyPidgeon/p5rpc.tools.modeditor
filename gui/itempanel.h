@@ -151,6 +151,8 @@ public:
     ItemTables items;
     ItemPointers itemPtrs;
     ItemNames itemNames;
+
+    void RandomizeConsumables(const size_t seed,const bool randomize);
 };
 static ItemPanel* itemPanel = ItemPanel::GetInstance();
 
