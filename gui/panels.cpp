@@ -27,14 +27,17 @@ void Panel::RenderPanel()
 
 	if (ImGui::Begin(label.c_str(),nullptr, windowFlags))
 	{
-		if (ImGui::Button("Apply"))
+		if (refreshable)
 		{
-			ApplyChanges();
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Refresh"))
-		{
-			Refresh();
+			if (ImGui::Button("Apply"))
+			{
+				ApplyChanges();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Refresh"))
+			{
+				Refresh();
+			}
 		}
 
 		RenderLogic();

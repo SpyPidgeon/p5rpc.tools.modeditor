@@ -4,16 +4,11 @@
 #include "itempanel.h"
 #include <functional>
 #include <random>
+#include <chrono>
+#include <cmath>
 
 void QuickPanel::RenderLogic()
 {
-	/*
-	if (ImGui::Button("Noclip"))
-	{
-		selectedIndex = QuickSelection::NOCLIP;
-	}
-	*/
-
 	if (ImGui::Button("Teleport"))
 	{
 		selectedIndex = QuickSelection::TELEPORT;
@@ -27,6 +22,11 @@ void QuickPanel::RenderLogic()
 	if (ImGui::Button("Randomizer"))
 	{
 		selectedIndex = QuickSelection::RANDOMIZER;
+	}
+
+	if (ImGui::Button("Noclip"))
+	{
+		selectedIndex = QuickSelection::NOCLIP;
 	}
 }
 
@@ -167,7 +167,7 @@ void QuickPanel::CallField()
 }
 
 // Noclip
-void NoclipSettings::NoclipKeyStateOn(WPARAM wParam)
+void NoclipSettings::NoclipKeyStateOn(const WPARAM wParam)
 {
 	auto* keyState = &quickPanel->keyState;
 
@@ -185,7 +185,7 @@ void NoclipSettings::NoclipKeyStateOn(WPARAM wParam)
 		*keyState |= KeyPressed::DOWN;
 }
 
-void NoclipSettings::NoclipKeyStateOff(WPARAM wParam)
+void NoclipSettings::NoclipKeyStateOff(const WPARAM wParam)
 {
 	auto* keyState = &quickPanel->keyState;
 
@@ -203,7 +203,68 @@ void NoclipSettings::NoclipKeyStateOff(WPARAM wParam)
 		*keyState &= ~KeyPressed::DOWN;
 }
 
+using std::to_underlying;
+using std::chrono::steady_clock;
+
 void NoclipSettings::NoclipLogic()
 {
+	static auto last = steady_clock::now();
+	auto now = steady_clock::now();
 
+	auto dt = now - last;
+	float deltaTime = std::chrono::duration_cast<std::chrono::seconds>(dt).count();
+	deltaTime = std::min(deltaTime, 0.05f);
+
+	auto keyState = quickPanel->keyState;
+
+	static const auto fldPCGetReshnd = GET_FLOWSCRIPT(FLD_PC_GET_RESHND);
+	static const auto fldModelAddTranslate = GET_FLOWSCRIPT(FLD_MODEL_ADD_TRANSLATE);
+	static const auto fldCameraYaw = GET_FLOWSCRIPT(FLD_CAMERA_GET_YAW);
+	static const auto fldModelSync = GET_FLOWSCRIPT(FLD_MODEL_SYNC_TRANSLATE);
+
+	RUN_FLOWSCRIPT(fldCameraYaw);
+	float cameraYaw = GET_RETURN_FLOAT();
+
+	RUN_FLOWSCRIPT(fldPCGetReshnd, 0);
+	int player = GET_RETURN_INT();
+
+	float radianYaw = cameraYaw * (IM_PI / 180);
+
+	Vector3 left = Vector3(std::cosf(radianYaw),0,-std::sinf(radianYaw));
+	Vector3 forward = Vector3(std::sinf(radianYaw), 0, std::cosf(radianYaw));
+
+	forward.x *= speed * deltaTime;
+	forward.z *= speed * deltaTime;
+
+	left.x *= speed * deltaTime;
+	left.z *= speed * deltaTime;
+
+	float verticalSpeed = speed * deltaTime;
+
+	if (keyState & to_underlying(KeyPressed::FORWARD))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, forward.x, 0, forward.z, 0);
+	}
+	if (keyState & to_underlying(KeyPressed::BACKWARD))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, -forward.x, 0, -forward.z, 0);
+	}
+	if (keyState & to_underlying(KeyPressed::LEFT))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, left.x, 0, left.z, 0);
+	}
+	if (keyState & to_underlying(KeyPressed::RIGHT))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, -left.x, 0, -left.z, 0);
+	}
+	if (keyState & to_underlying(KeyPressed::UP))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, 0, verticalSpeed, 0, 0);
+	}
+	if (keyState & to_underlying(KeyPressed::DOWN))
+	{
+		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, 0, -verticalSpeed, 0, 0);
+	}
+
+	RUN_FLOWSCRIPT(fldModelSync, (float)player);
 }

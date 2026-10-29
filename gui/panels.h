@@ -25,6 +25,7 @@ struct Panel
     std::string label;
     const char* childLabel = "Inspector";
     bool open = false;
+    bool refreshable = true;
     int selectedIndex = 0;
     uint16_t sortingPriority = 0;
     void RenderPanel();

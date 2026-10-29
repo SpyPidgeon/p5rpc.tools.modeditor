@@ -6,10 +6,10 @@
 struct NoclipSettings
 {
 	bool enabled = false;
-	float speed = 10;
+	float speed = 100;
 
-	void NoclipKeyStateOn(WPARAM wParam);
-	void NoclipKeyStateOff(WPARAM wParam);
+	void NoclipKeyStateOn(const WPARAM wParam);
+	void NoclipKeyStateOff(const WPARAM wParam);
 	void NoclipLogic();
 };
 IMGUI_REFLECT(NoclipSettings,enabled,speed);
@@ -51,7 +51,7 @@ IMGUI_REFLECT(CallEventParams, majorID, minorID);
 class QuickPanel : Panel
 {
 public:
-	QuickPanel() { this->label = "Quick"; this->childLabel = "Options"; }
+	QuickPanel() { this->label = "Quick"; this->childLabel = "Options"; this->refreshable = false; }
 	static QuickPanel* GetInstance() { static QuickPanel* instance = new QuickPanel(); return instance; }
 
 	void RenderLogic() override;
