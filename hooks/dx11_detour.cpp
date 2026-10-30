@@ -117,7 +117,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 		if (wParam == VK_F2)
 		{
-			quickPanel->noclip.enabled = !quickPanel->noclip.enabled;
+			quickPanel->noclip.Toggle();
 		}
 
 		if (quickPanel->noclip.enabled)

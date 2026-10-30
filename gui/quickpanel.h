@@ -11,8 +11,9 @@ struct NoclipSettings
 	void NoclipKeyStateOn(const WPARAM wParam);
 	void NoclipKeyStateOff(const WPARAM wParam);
 	void NoclipLogic();
+	void Toggle();
 };
-IMGUI_REFLECT(NoclipSettings,enabled,speed);
+IMGUI_REFLECT(NoclipSettings,speed);
 
 enum KeyPressed : BYTE
 {

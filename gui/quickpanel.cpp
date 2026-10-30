@@ -38,6 +38,17 @@ void QuickPanel::InspectorLogic()
 	switch (selectedIndex)
 	{
 	case QuickSelection::NOCLIP:
+
+		if (ImGui::Button("Toggle"))
+		{
+			noclip.Toggle();
+		}
+		ImGui::SameLine();
+
+		ImGui::PushItemFlag(ImGuiItemFlags_ReadOnly, true);
+		ImGui::Checkbox("##enabled", &noclip.enabled);
+		ImGui::PopItemFlag();
+
 		ImReflect::Input("Noclip", noclip);
 
 		if (noclip.enabled == false && keyState != 0)
@@ -201,6 +212,14 @@ void NoclipSettings::NoclipKeyStateOff(const WPARAM wParam)
 		*keyState &= ~KeyPressed::UP;
 	else if (wParam == VK_CONTROL)
 		*keyState &= ~KeyPressed::DOWN;
+}
+
+void NoclipSettings::Toggle()
+{
+	static auto fldPCFloating = GET_FLOWSCRIPT(FLD_PC_MODEL_SET_FLOATING);
+
+	enabled = !enabled;
+	RUN_FLOWSCRIPT(fldPCFloating, (float)enabled);
 }
 
 using std::to_underlying;
