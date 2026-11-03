@@ -104,9 +104,23 @@ void QuickPanel::InspectorLogic()
 		ImGui::TextWrapped("Warning: Randomizing enemies may cause crashes if you do not have Custom Bonus Tweaks!");
 		ImGui::Spacing();
 
+		static bool encountersShuffled = false;
+		static std::vector<EnemyEncounter> encounterBytes(encounterPanel->enemyEncounters.begin(), encounterPanel->enemyEncounters.end());
+
 		if (ImGui::Button("Randomize Encounters"))
 		{
+			encountersShuffled = true;
 			encounterPanel->RandomizeEncounters(encounterSettings, currentHash);
+		}
+
+		if (encountersShuffled)
+		{
+			if (ImGui::Button("Unrandomize Encounters"))
+			{
+				encountersShuffled = false;
+				std::memcpy(encounterPanel->enemyEncounters.data(), encounterBytes.data(), sizeof(encounterPanel->enemyEncounters));
+				encounterPanel->ApplyChanges();
+			}
 		}
 
 		ImGui::Separator();
@@ -116,9 +130,25 @@ void QuickPanel::InspectorLogic()
 		ImGui::TextWrapped("This only shuffles active skills, it skips passives and null skills and does not change the particle effects.");
 		ImGui::Spacing();
 
+		static bool skillsShuffled = false;
+		static std::vector<ActiveSkill> skillBytes(skillPanel->activeSkillArray.begin(),skillPanel->activeSkillArray.end());
+		static std::vector<SkillElement> elementBytes(skillPanel->skillElementArray.begin(), skillPanel->skillElementArray.end());
+
 		if (ImGui::Button("Randomize Skills"))
 		{
+			skillsShuffled = true;
 			skillPanel->RandomizeSkills(currentHash);
+		}
+
+		if (skillsShuffled)
+		{
+			if (ImGui::Button("Unrandomize Skills"))
+			{
+				skillsShuffled = false;
+				std::memcpy(skillPanel->activeSkillArray.data(), skillBytes.data(), sizeof(skillPanel->activeSkillArray));
+				std::memcpy(skillPanel->skillElementArray.data(), elementBytes.data(), sizeof(skillPanel->skillElementArray));
+				skillPanel->ApplyChanges();
+			}
 		}
 
 		ImGui::Separator();
@@ -129,9 +159,22 @@ void QuickPanel::InspectorLogic()
 		static bool randomizeItems = false;
 		ImGui::Checkbox("Randomize Consumable Skill", &randomizeItems);
 
+		static bool itemsRandomized = false;
+		static std::vector<Consumable> itemBytes(itemPanel->items.consumables.begin(), itemPanel->items.consumables.end());
+
 		if (ImGui::Button("Randomize Consumables"))
 		{
+			itemsRandomized = true;
 			itemPanel->RandomizeConsumables(currentHash, randomizeItems);
+		}
+
+		if (itemsRandomized)
+		{
+			if (ImGui::Button("Unrandomize Items"))
+			{
+				itemsRandomized = false;
+				std::memcpy(itemPanel->items.consumables.data(), itemBytes.data(), sizeof(itemPanel->items.consumables));
+			}
 		}
 
 		ImGui::Separator();
