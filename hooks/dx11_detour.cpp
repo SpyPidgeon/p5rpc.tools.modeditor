@@ -120,19 +120,13 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			quickPanel->noclip.Toggle();
 		}
 
-		if (quickPanel->noclip.enabled)
-		{
-			quickPanel->noclip.NoclipKeyStateOn(wParam);
-		}
+		quickPanel->noclip.NoclipKeyStateOn(wParam);
 
 		break;
 
 	case WM_KEYUP:
 
-		if (quickPanel->noclip.enabled)
-		{
-			quickPanel->noclip.NoclipKeyStateOff(wParam);
-		}
+		quickPanel->noclip.NoclipKeyStateOff(wParam);
 
 		break;
 	}

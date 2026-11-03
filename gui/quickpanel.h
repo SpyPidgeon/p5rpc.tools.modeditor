@@ -6,7 +6,7 @@
 struct NoclipSettings
 {
 	bool enabled = false;
-	float speed = 100;
+	float speed = 500;
 
 	void NoclipKeyStateOn(const WPARAM wParam);
 	void NoclipKeyStateOff(const WPARAM wParam);

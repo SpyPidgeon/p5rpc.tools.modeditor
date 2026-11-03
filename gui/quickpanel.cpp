@@ -216,10 +216,7 @@ void NoclipSettings::NoclipKeyStateOff(const WPARAM wParam)
 
 void NoclipSettings::Toggle()
 {
-	static auto fldPCFloating = GET_FLOWSCRIPT(FLD_PC_MODEL_SET_FLOATING);
-
 	enabled = !enabled;
-	RUN_FLOWSCRIPT(fldPCFloating, (float)enabled);
 }
 
 using std::to_underlying;
@@ -235,6 +232,8 @@ void NoclipSettings::NoclipLogic()
 	deltaTime = std::min(deltaTime, 0.05f);
 
 	auto keyState = quickPanel->keyState;
+
+	static constexpr int interp = 1;
 
 	static const auto fldPCGetReshnd = GET_FLOWSCRIPT(FLD_PC_GET_RESHND);
 	static const auto fldModelAddTranslate = GET_FLOWSCRIPT(FLD_MODEL_ADD_TRANSLATE);
@@ -260,30 +259,37 @@ void NoclipSettings::NoclipLogic()
 
 	float verticalSpeed = speed * deltaTime;
 
+	Vector3 finalVector = Vector3(0,0,0);
+
 	if (keyState & to_underlying(KeyPressed::FORWARD))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, forward.x, 0, forward.z, 0);
+		finalVector.x += forward.x;
+		finalVector.z += forward.z;
 	}
 	if (keyState & to_underlying(KeyPressed::BACKWARD))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, -forward.x, 0, -forward.z, 0);
+		finalVector.x -= forward.x;
+		finalVector.z -= forward.z;
 	}
 	if (keyState & to_underlying(KeyPressed::LEFT))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, left.x, 0, left.z, 0);
+		finalVector.x += left.x;
+		finalVector.z += left.z;
 	}
 	if (keyState & to_underlying(KeyPressed::RIGHT))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, -left.x, 0, -left.z, 0);
+		finalVector.x -= left.x;
+		finalVector.z -= left.z;
 	}
 	if (keyState & to_underlying(KeyPressed::UP))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, 0, verticalSpeed, 0, 0);
+		finalVector.y += verticalSpeed;
 	}
 	if (keyState & to_underlying(KeyPressed::DOWN))
 	{
-		RUN_FLOWSCRIPT(fldModelAddTranslate, (float)player, 0, -verticalSpeed, 0, 0);
+		finalVector.y -= verticalSpeed;
 	}
 
+	RUN_FLOWSCRIPT(fldModelAddTranslate,(float)player, finalVector.x, finalVector.y, finalVector.z, (float)interp);
 	RUN_FLOWSCRIPT(fldModelSync, (float)player);
 }
