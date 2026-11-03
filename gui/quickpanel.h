@@ -27,10 +27,10 @@ enum KeyPressed : BYTE
 
 enum QuickSelection
 {
-	TELEPORT,
-	NOCLIP,
 	QUICK_FUNCTIONS,
-	RANDOMIZER
+	RANDOMIZER,
+	TELEPORT,
+	NOCLIP
 };
 
 struct CallFieldParams

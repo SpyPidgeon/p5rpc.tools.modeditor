@@ -76,9 +76,11 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, PersonaID& value, ImSet
 			{
 				value.id = j;
 				changed = true;
+				ImGui::CloseCurrentPopup();
 			}
 			if (is_selected)
 				ImGui::SetItemDefaultFocus();
+
 		}
 		ImGui::EndChild();
 		ImGui::EndCombo();
@@ -132,6 +134,7 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, DatUnit_Skills& value, 
 					{
 						value.skill[i] = j;
 						changed = true;
+						ImGui::CloseCurrentPopup();
 					}
 					if (is_selected)
 						ImGui::SetItemDefaultFocus();
@@ -197,7 +200,7 @@ void PartyPanel::RenderLogic()
 			{
 				int equippedPersona = partyMembers[i].first.equippedPersona;
 				int personaID = partyMembers[i].first.StockPersonas[equippedPersona].personaID;
-				const char* label = personaNames[personaID].c_str();
+				const char* label = partyMembers[i].second.c_str();
 				ImGui::PushID(i);
 				if (ImGui::CollapsingHeader(label))
 				{

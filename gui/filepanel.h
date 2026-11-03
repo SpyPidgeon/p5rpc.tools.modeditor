@@ -4,7 +4,7 @@
 class FilePanel : SearchablePanel
 {
 public:
-	FilePanel() { this->label = "Files"; }
+    FilePanel() { this->label = "Files"; this->refreshable = false; }
     static FilePanel* GetInstance() { FilePanel* instance = new FilePanel(); return instance; }
 
     void RenderLogic() override;

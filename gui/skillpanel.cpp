@@ -152,6 +152,7 @@ void SkillPanel::InspectorLogic()
 		{
 			for (int i = 0; i < knowingHeartOption.size(); i++)
 			{
+				ImGui::PushID(i);
 				bool is_selected = strcmp(preview, knowingHeartOption[i]);
 
 				if (ImGui::Selectable(knowingHeartOption[i], is_selected))
@@ -162,6 +163,8 @@ void SkillPanel::InspectorLogic()
 
 				if (is_selected)
 					ImGui::SetItemDefaultFocus();
+
+				ImGui::PopID();
 			}
 			ImGui::EndCombo();
 		}

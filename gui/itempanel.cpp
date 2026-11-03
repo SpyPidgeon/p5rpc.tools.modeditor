@@ -143,8 +143,11 @@ void tag_invoke(ImReflect::ImInput_t, const char* label, SkillID& value, ImSetti
 			if (skillSearchBuffer[0] != '\0' && !SearchablePanel::TextMatch(skillSearchBuffer, dispName))
 				continue;
 
-			if (ImGui::Selectable(dispName.c_str(), is_selected, 0))
+			if (ImGui::Selectable(dispName.c_str(), is_selected))
+			{
 				value.skillID = i;
+				ImGui::CloseCurrentPopup();
+			}
 
 			if (is_selected)
 				ImGui::SetItemDefaultFocus();

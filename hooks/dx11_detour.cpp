@@ -113,11 +113,23 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		}
 
 		if (wParam == VK_F1)
+		{
+			if (io != nullptr)
+			{
+				auto viewport = ImGui::GetMainViewport();
+				int x = 0, y = 0;
+				x = viewport->Size.x / 2;
+				y = viewport->Size.y / 2;
+
+				SetCursorPos(x, y);
+			}
 			ToggleRender();
+		}
 
 		if (wParam == VK_F2)
 		{
 			quickPanel->noclip.Toggle();
+			quickPanel->keyState = 0;
 		}
 
 		quickPanel->noclip.NoclipKeyStateOn(wParam);

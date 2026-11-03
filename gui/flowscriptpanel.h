@@ -66,7 +66,7 @@ static const std::array<const char*, 6> flowCategoryNames =
 class FlowScriptPanel : SearchablePanel
 {
 public:
-	FlowScriptPanel() { this->label = "FlowScript"; this->childLabel = "Function"; }
+	FlowScriptPanel() { this->label = "FlowScript"; this->childLabel = "Function"; this->refreshable = false; }
 	static FlowScriptPanel* GetInstance() { static FlowScriptPanel* instance = new FlowScriptPanel(); return instance; }
 
 	void RenderLogic() override;

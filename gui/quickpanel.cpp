@@ -9,11 +9,6 @@
 
 void QuickPanel::RenderLogic()
 {
-	if (ImGui::Button("Teleport"))
-	{
-		selectedIndex = QuickSelection::TELEPORT;
-	}
-
 	if (ImGui::Button("Field & Event"))
 	{
 		selectedIndex = QuickSelection::QUICK_FUNCTIONS;
@@ -22,6 +17,11 @@ void QuickPanel::RenderLogic()
 	if (ImGui::Button("Randomizer"))
 	{
 		selectedIndex = QuickSelection::RANDOMIZER;
+	}
+
+	if (ImGui::Button("Teleport"))
+	{
+		selectedIndex = QuickSelection::TELEPORT;
 	}
 
 	if (ImGui::Button("Noclip"))
@@ -50,6 +50,7 @@ void QuickPanel::InspectorLogic()
 		ImGui::PopItemFlag();
 
 		ImReflect::Input("Noclip", noclip);
+		ImGui::TextWrapped("WASD for horizontal movement, Space/LCTRL for vertical movement. F2 shortcut to toggle.");
 
 		if (noclip.enabled == false && keyState != 0)
 			keyState = 0;
@@ -174,7 +175,7 @@ void QuickPanel::CallEvent()
 void QuickPanel::CallField()
 {
 	RUN_FLOWSCRIPT_BY_NAME(CALL_FIELD, (float)fieldParams.majorID, (float)fieldParams.minorID, (float)fieldParams.entranceMajorID,
-		(float)fieldParams.entranceMajorID);
+		(float)fieldParams.entranceMinorID);
 }
 
 // Noclip
