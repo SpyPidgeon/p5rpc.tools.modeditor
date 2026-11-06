@@ -28,6 +28,11 @@ void QuickPanel::RenderLogic()
 	{
 		selectedIndex = QuickSelection::NOCLIP;
 	}
+
+	if (ImGui::Button("Freecam"))
+	{
+		selectedIndex = QuickSelection::FREECAM;
+	}
 }
 
 static EncounterRandomSettings encounterSettings;
@@ -45,9 +50,11 @@ void QuickPanel::InspectorLogic()
 		}
 		ImGui::SameLine();
 
+		ImGui::BeginDisabled(true);
 		ImGui::PushItemFlag(ImGuiItemFlags_ReadOnly, true);
 		ImGui::Checkbox("##enabled", &noclip.enabled);
 		ImGui::PopItemFlag();
+		ImGui::EndDisabled();
 
 		ImReflect::Input("Noclip", noclip);
 		ImGui::TextWrapped("WASD for horizontal movement, Space/LCTRL for vertical movement. F2 shortcut to toggle.");
@@ -55,6 +62,84 @@ void QuickPanel::InspectorLogic()
 		if (noclip.enabled == false && keyState != 0)
 			keyState = 0;
 		break;
+	case QuickSelection::FREECAM:
+	{
+		if (ImGui::Button("Toggle"))
+		{
+			freecam.Toggle();
+		}
+		ImGui::BeginDisabled(true);
+		ImGui::SameLine();
+		ImGui::Checkbox("##freecamtoggle", &freecam.enabled);
+		ImGui::EndDisabled();
+
+		ImReflect::Input("Freecam Settings", freecam);
+		ImGui::TextWrapped("WASD controls. Does not work in events or battles. F3 Shortcut to activate.");
+
+		ImGui::Separator();
+
+		static std::string saveLabel = "CameraCoords";
+		if (ImGui::Button("Save Coordinates"))
+		{
+			freecam.SaveCurrentCoordinates(saveLabel);
+		}
+		ImGui::InputText("Coordinate Label", &saveLabel);
+
+		if (!freecam.freeCamCoords.empty() && ImGui::Button("Copy All Coords to Clipboard"))
+		{
+			CopyToClipboard(freecam.GetAllCoordsText());
+		}
+
+		if (!freecam.freeCamCoords.empty() && ImGui::CollapsingHeader("Saved Coordinates"))
+		{
+			if (ImGui::Button("Remove All"))
+			{
+				freecam.freeCamCoords.clear();
+			}
+
+			for (int i = 0; i < freecam.freeCamCoords.size(); i++)
+			{
+				auto& coords = freecam.freeCamCoords[i];
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader(coords.title.c_str()))
+				{
+					ImReflect::Input(coords.title.c_str(), coords);
+
+					std::string buttonLabel = std::format("Teleport To {}", coords.title);
+
+					ImGui::BeginDisabled(!freecam.enabled);
+					if (ImGui::Button(buttonLabel.c_str()))
+					{
+						static const auto fldCameraSetPos = GET_FLOWSCRIPT(FLD_CAMERA_SET_POS);
+						static const auto fldCameraSetRot = GET_FLOWSCRIPT(FLD_CAMERA_SET_ROT);
+
+						RUN_FLOWSCRIPT(fldCameraSetPos, coords.position.x, coords.position.y, coords.position.z);
+						RUN_FLOWSCRIPT(fldCameraSetRot, coords.qAngle.x, coords.qAngle.y, coords.qAngle.z, coords.qAngle.w);
+					}
+					if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip | ImGuiHoveredFlags_AllowWhenDisabled))
+						ImGui::SetTooltip("Only works when freecam is on.");
+					ImGui::EndDisabled();
+
+					if (ImGui::Button("Copy This To Clipboard"))
+					{
+						if (!CopyToClipboard(coords.GetTextInfo()))
+						{
+							continue;
+						}
+					}
+
+					if (ImGui::Button("Remove This"))
+					{
+						std::swap(coords, freecam.freeCamCoords.back());
+						freecam.freeCamCoords.pop_back();
+					}
+				}
+				ImGui::PopID();
+			}
+		}
+
+		break;
+	}
 	case QuickSelection::TELEPORT:
 
 		ImReflect::Input("Teleport", teleport);
@@ -266,7 +351,7 @@ void NoclipSettings::Toggle()
 using std::to_underlying;
 using std::chrono::steady_clock;
 
-void NoclipSettings::NoclipLogic()
+float QuickPanel::GetDeltaTime()
 {
 	static auto last = steady_clock::now();
 	auto now = steady_clock::now();
@@ -274,6 +359,13 @@ void NoclipSettings::NoclipLogic()
 	auto dt = now - last;
 	float deltaTime = std::chrono::duration_cast<std::chrono::seconds>(dt).count();
 	deltaTime = std::min(deltaTime, 0.05f);
+
+	return deltaTime;
+}
+
+void NoclipSettings::NoclipLogic()
+{
+	float deltaTime = quickPanel->GetDeltaTime();
 
 	auto keyState = quickPanel->keyState;
 
@@ -336,4 +428,108 @@ void NoclipSettings::NoclipLogic()
 
 	RUN_FLOWSCRIPT(fldModelAddTranslate,(float)player, finalVector.x, finalVector.y, finalVector.z, (float)interp);
 	RUN_FLOWSCRIPT(fldModelSync, (float)player);
+}
+
+void FreeCamSettings::FreeCamLogic()
+{
+	if (ImGui::GetCurrentContext() == nullptr)
+		return;
+
+	auto keyState = quickPanel->keyState;
+	float deltaTime = quickPanel->GetDeltaTime();
+
+	// Quaternion
+	static const auto fldCameraRotX = GET_FLOWSCRIPT(FLD_CAMERA_GET_X_ROT);
+	static const auto fldCameraRotY = GET_FLOWSCRIPT(FLD_CAMERA_GET_Y_ROT);
+	static const auto fldCameraRotZ = GET_FLOWSCRIPT(FLD_CAMERA_GET_Z_ROT);
+	static const auto fldCameraRotW = GET_FLOWSCRIPT(FLD_CAMERA_GET_W_ROT);
+
+	// Position
+	static const auto fldCameraPosX = GET_FLOWSCRIPT(FLD_CAMERA_GET_X_POS);
+	static const auto fldCameraPosY = GET_FLOWSCRIPT(FLD_CAMERA_GET_Y_POS);
+	static const auto fldCameraPosZ = GET_FLOWSCRIPT(FLD_CAMERA_GET_Z_POS);
+
+	static const auto fldCameraSetPos = GET_FLOWSCRIPT(FLD_CAMERA_SET_POS);
+	static const auto fldCameraSetRot = GET_FLOWSCRIPT(FLD_CAMERA_SET_ROT);
+
+	auto viewport = ImGui::GetMainViewport();
+	int centerX = viewport->Size.x / 2;
+	int centerY = viewport->Size.y / 2;
+
+	POINT lastMouseCoords = { centerX,centerY };
+	POINT newMouseCoords;
+	GetCursorPos(&newMouseCoords);
+
+	POINT deltaMouseCoords;
+	deltaMouseCoords.x = newMouseCoords.x - lastMouseCoords.x;
+	deltaMouseCoords.y = newMouseCoords.y - lastMouseCoords.y;
+
+	lastMouseCoords = newMouseCoords;
+
+	SetCursorPos(centerX,centerY);
+
+	Vector3 currentCoords;
+	RUN_FLOWSCRIPT(fldCameraPosX);
+	currentCoords.x = GET_RETURN_FLOAT();
+	RUN_FLOWSCRIPT(fldCameraPosY);
+	currentCoords.y = GET_RETURN_FLOAT();
+	RUN_FLOWSCRIPT(fldCameraPosZ);
+	currentCoords.z = GET_RETURN_FLOAT();
+
+	angles.yaw -= deltaMouseCoords.x * sensitivity;
+	angles.pitch -= deltaMouseCoords.y * sensitivity;
+
+	angles.pitch = std::clamp(angles.pitch, -89.0f, 89.0f);
+
+	Euler currentAngle = angles;
+
+	currentAngle.yaw *= IM_PI / 180;
+	currentAngle.pitch *= IM_PI / 180;
+	currentAngle.roll *= IM_PI / 180;
+
+	Vector3 forward =
+	{
+		std::sinf(currentAngle.yaw) * std::cosf(currentAngle.pitch),
+		-std::sinf(currentAngle.pitch),
+		std::cosf(currentAngle.yaw) * std::cosf(currentAngle.pitch)
+	};
+
+	forward = -forward;
+
+	Vector3 left =
+	{
+		-std::cosf(currentAngle.yaw) * std::cosf(currentAngle.pitch),
+		0,
+		std::sinf(currentAngle.yaw) * std::cosf(currentAngle.pitch)
+	};
+
+	forward.x *= speed * deltaTime;
+	forward.y *= speed * deltaTime;
+	forward.z *= speed * deltaTime;
+
+	left.x *= speed * deltaTime;
+	left.y *= speed * deltaTime;
+	left.z *= speed * deltaTime;
+
+	if (keyState & to_underlying(KeyPressed::FORWARD))
+		currentCoords += forward;
+	if (keyState & to_underlying(KeyPressed::BACKWARD))
+		currentCoords -= forward;
+	if (keyState & to_underlying(KeyPressed::LEFT))
+		currentCoords += left;
+	if (keyState & to_underlying(KeyPressed::RIGHT))
+		currentCoords -= left;
+
+	RUN_FLOWSCRIPT(fldCameraSetPos, currentCoords.x, currentCoords.y, currentCoords.z);
+
+	if (deltaMouseCoords.x == 0 && deltaMouseCoords.y == 0)
+		return;
+
+	Quaternion cameraQuat = Quaternion::EulerToQuat(currentAngle.yaw, currentAngle.pitch, 0.0f);
+
+
+	if (cameraQuat.w < 0.0f)
+		cameraQuat = -cameraQuat;
+
+	RUN_FLOWSCRIPT(fldCameraSetRot, cameraQuat.x, cameraQuat.y, cameraQuat.z, cameraQuat.w);
 }

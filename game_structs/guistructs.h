@@ -13,3 +13,5 @@ extern HMODULE dll_handle;
 
 std::string GetDLLPath(const std::string& path);
 void HelpMarker(const char* desc);
+
+bool CopyToClipboard(const std::string& text);

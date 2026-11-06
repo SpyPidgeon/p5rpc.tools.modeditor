@@ -74,10 +74,13 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	if (context != nullptr)
 	{
 		io = &ImGui::GetIO();
-		lockControls = io->WantTextInput || quickPanel->noclip.enabled;
+		lockControls = io->WantTextInput;
 	}
 	else
 		lockControls = false;
+
+	if (!lockControls)
+		lockControls = quickPanel->noclip.enabled || quickPanel->freecam.enabled;
 
 	switch (uMsg)
 	{
@@ -132,6 +135,12 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			quickPanel->keyState = 0;
 		}
 
+		if (wParam == VK_F3)
+		{
+			quickPanel->freecam.Toggle();
+			quickPanel->keyState = 0;
+		}
+
 		quickPanel->noclip.NoclipKeyStateOn(wParam);
 
 		break;
@@ -166,9 +175,13 @@ int GetWindowHeight(HWND window)
 
 static long __stdcall detour_present(IDXGISwapChain* p_swap_chain, UINT sync_interval, UINT flags) {
 
-	if (quickPanel != nullptr && quickPanel->noclip.enabled)
+	if (quickPanel != nullptr)
 	{
-		quickPanel->noclip.NoclipLogic();
+		if (quickPanel->noclip.enabled)
+			quickPanel->noclip.NoclipLogic();
+
+		if (quickPanel->freecam.enabled && !fetchContext)
+			quickPanel->freecam.FreeCamLogic();
 	}
 
 	if (!fetchContext)
