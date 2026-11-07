@@ -74,7 +74,7 @@ void QuickPanel::InspectorLogic()
 		ImGui::EndDisabled();
 
 		ImReflect::Input("Freecam Settings", freecam);
-		ImGui::TextWrapped("WASD controls. Does not work in events or battles. F3 Shortcut to activate.");
+		ImGui::TextWrapped("WASD controls. Space and CTRL for up and down. Q and E for left/right tilting. R to reset tilt.\n Does not work in events or battles. F3 Shortcut to activate.");
 
 		ImGui::Separator();
 
@@ -323,6 +323,12 @@ void NoclipSettings::NoclipKeyStateOn(const WPARAM wParam)
 		*keyState |= KeyPressed::UP;
 	else if (wParam == VK_CONTROL)
 		*keyState |= KeyPressed::DOWN;
+	else if (wParam == 'Q')
+		*keyState |= KeyPressed::LEAN_LEFT;
+	else if (wParam == 'E')
+		*keyState |= KeyPressed::LEAN_RIGHT;
+	else if (wParam == 'R')
+		*keyState |= KeyPressed::RESET;
 }
 
 void NoclipSettings::NoclipKeyStateOff(const WPARAM wParam)
@@ -341,6 +347,12 @@ void NoclipSettings::NoclipKeyStateOff(const WPARAM wParam)
 		*keyState &= ~KeyPressed::UP;
 	else if (wParam == VK_CONTROL)
 		*keyState &= ~KeyPressed::DOWN;
+	else if (wParam == 'Q')
+		*keyState &= ~KeyPressed::LEAN_LEFT;
+	else if (wParam == 'E')
+		*keyState &= ~KeyPressed::LEAN_RIGHT;
+	else if (wParam == 'R')
+		*keyState &= ~KeyPressed::RESET;
 }
 
 void NoclipSettings::Toggle()
@@ -481,6 +493,14 @@ void FreeCamSettings::FreeCamLogic()
 
 	angles.pitch = std::clamp(angles.pitch, -89.0f, 89.0f);
 
+	if (keyState & to_underlying(KeyPressed::LEAN_LEFT))
+		angles.roll += rollSpeed * deltaTime;
+	if (keyState & to_underlying(KeyPressed::LEAN_RIGHT))
+		angles.roll -= rollSpeed * deltaTime;
+
+	if (keyState & to_underlying(KeyPressed::RESET))
+		angles.roll = 0.0f;
+
 	Euler currentAngle = angles;
 
 	currentAngle.yaw *= IM_PI / 180;
@@ -503,6 +523,18 @@ void FreeCamSettings::FreeCamLogic()
 		std::sinf(currentAngle.yaw) * std::cosf(currentAngle.pitch)
 	};
 
+	if (currentAngle.roll != 0.0f)
+	{
+		left = Euler::RotateAxis(left, forward, -currentAngle.roll).Normal();
+	}
+
+	if (horizontalLock)
+	{
+		forward.y = 0.0f;
+		left.y = 0.0f;
+	}
+
+
 	forward.x *= speed * deltaTime;
 	forward.y *= speed * deltaTime;
 	forward.z *= speed * deltaTime;
@@ -519,14 +551,14 @@ void FreeCamSettings::FreeCamLogic()
 		currentCoords += left;
 	if (keyState & to_underlying(KeyPressed::RIGHT))
 		currentCoords -= left;
+	if (keyState & to_underlying(KeyPressed::UP))
+		currentCoords.y += speed * deltaTime;
+	if (keyState & to_underlying(KeyPressed::DOWN))
+		currentCoords.y -= speed * deltaTime;
 
 	RUN_FLOWSCRIPT(fldCameraSetPos, currentCoords.x, currentCoords.y, currentCoords.z);
 
-	if (deltaMouseCoords.x == 0 && deltaMouseCoords.y == 0)
-		return;
-
-	Quaternion cameraQuat = Quaternion::EulerToQuat(currentAngle.yaw, currentAngle.pitch, 0.0f);
-
+	Quaternion cameraQuat = Quaternion::EulerToQuat(currentAngle.yaw, currentAngle.pitch, currentAngle.roll);
 
 	if (cameraQuat.w < 0.0f)
 		cameraQuat = -cameraQuat;

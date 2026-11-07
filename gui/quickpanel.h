@@ -15,14 +15,17 @@ struct NoclipSettings
 };
 IMGUI_REFLECT(NoclipSettings,speed);
 
-enum KeyPressed : BYTE
+enum KeyPressed : unsigned short
 {
 	FORWARD = 1 << 0,
 	BACKWARD = 1 << 1,
 	LEFT = 1 << 2,
 	RIGHT = 1 << 3,
 	UP = 1 << 4,
-	DOWN = 1 << 5
+	DOWN = 1 << 5,
+	LEAN_LEFT = 1 << 6,
+	LEAN_RIGHT = 1 << 7,
+	RESET = 1 << 8
 };
 
 enum QuickSelection
@@ -72,8 +75,10 @@ struct FreeCamSettings
 {
 	std::vector<FreeCamCoord> freeCamCoords;
 	bool enabled = false;
+	bool horizontalLock = false;
 	float speed = 300;
 	float sensitivity = 0.25f;
+	float rollSpeed = 10.0f;
 
 	Euler angles = {0,0,0};
 
@@ -165,7 +170,7 @@ struct FreeCamSettings
 		return textInfo;
 	}
 };
-IMGUI_REFLECT(FreeCamSettings, speed, sensitivity);
+IMGUI_REFLECT(FreeCamSettings, horizontalLock, speed, sensitivity, rollSpeed);
 
 class QuickPanel : Panel
 {
@@ -181,7 +186,7 @@ public:
 
 	NoclipSettings noclip;
 	FreeCamSettings freecam;
-	BYTE keyState;
+	uint16_t keyState;
 	Vector3 teleport;
 
 	CallFieldParams fieldParams;

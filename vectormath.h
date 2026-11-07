@@ -51,7 +51,16 @@ struct Vector3
 	void operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; }
 	void operator-=(const Vector3& other) { x -= other.x; y -= other.y; z -= other.z; }
 
-	Vector3 operator-() { return { -x,-y,-z }; }
+	Vector3 operator*(const float m) const { return { x * m, y * m, z * m }; }
+	Vector3 operator*(const Vector3& m) const { return {x * m.x, y * m.y, z * m.z}; }
+
+	Vector3 operator+(const Vector3& other) const { return { x + other.x, y + other.y, z + other.z }; }
+
+	Vector3 operator-() const { return { -x,-y,-z }; }
+
+	float DotProduct(const Vector3& other) const { return x * other.x + y * other.y + z * other.z; }
+	Vector3 CrossProduct(const Vector3& other) const { return { y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x };
+	}
 };
 IMGUI_REFLECT(Vector3, x, y, z);
 
@@ -106,6 +115,20 @@ struct std::formatter<Quaternion> : std::formatter<std::string>
 struct Euler
 {
 	float yaw, pitch, roll;
+
+	static Vector3 RotateAxis(const Vector3& vec, const Vector3& axis, float radians)
+	{
+		float c = std::cosf(radians);
+		float s = std::sinf(radians);
+		float d = vec.DotProduct(axis);
+
+		Vector3 term1 = vec * c;
+		Vector3 axisCross = axis.CrossProduct(vec);
+		Vector3 term2 = axisCross * s;
+		Vector3 term3 = axis * (d * (1.0f - c));
+
+		return term1 + term2 + term3;
+	}
 };
 IMGUI_REFLECT(Euler, yaw, pitch, roll);
 
