@@ -19,11 +19,6 @@ void QuickPanel::RenderLogic()
 		selectedIndex = QuickSelection::RANDOMIZER;
 	}
 
-	if (ImGui::Button("Teleport"))
-	{
-		selectedIndex = QuickSelection::TELEPORT;
-	}
-
 	if (ImGui::Button("Noclip"))
 	{
 		selectedIndex = QuickSelection::NOCLIP;
@@ -43,7 +38,7 @@ void QuickPanel::InspectorLogic()
 	switch (selectedIndex)
 	{
 	case QuickSelection::NOCLIP:
-
+	{
 		if (ImGui::Button("Toggle"))
 		{
 			noclip.Toggle();
@@ -61,7 +56,67 @@ void QuickPanel::InspectorLogic()
 
 		if (noclip.enabled == false && keyState != 0)
 			keyState = 0;
+
+		static std::string saveLabel = "Coordinates";
+		if (ImGui::Button("Save Coordinates"))
+		{
+			noclip.SaveCurrentCoordinates(saveLabel, savedCoordinates);
+		}
+		ImGui::InputText("Coordinate Label", &saveLabel);
+
+		if (!savedCoordinates.empty() && ImGui::Button("Copy All Coords to Clipboard"))
+		{
+			CopyToClipboard(GetAllCoordsText());
+		}
+
+		if (!savedCoordinates.empty() && ImGui::CollapsingHeader("Saved Coordinates"))
+		{
+			if (ImGui::Button("Remove All"))
+			{
+				savedCoordinates.clear();
+			}
+
+			for (int i = 0; i < savedCoordinates.size(); i++)
+			{
+				auto& coords = savedCoordinates[i];
+				ImGui::PushID(i);
+				if (ImGui::CollapsingHeader(coords.title.c_str()))
+				{
+					ImReflect::Input(coords.title.c_str(), coords);
+
+					std::string buttonLabel = std::format("Teleport To {}", coords.title);
+
+					if (ImGui::Button(buttonLabel.c_str()))
+					{
+						static const auto fldModelSetTranslate = GET_FLOWSCRIPT(FLD_MODEL_SET_TRANSLATE);
+						static const auto fldModelSetRotate = GET_FLOWSCRIPT(FLD_MODEL_SET_ROTATE);
+
+						static const auto fldPCGetReshnd = GET_FLOWSCRIPT(FLD_PC_GET_RESHND);
+						int player = 77; // Default value.
+						RUN_FLOWSCRIPT(fldPCGetReshnd, 0);
+						player = GET_RETURN_INT();
+
+						RUN_FLOWSCRIPT(fldModelSetTranslate, (float)player, coords.position.x, coords.position.y, coords.position.z, 0);
+						RUN_FLOWSCRIPT(fldModelSetRotate, (float)player, 0, coords.angle.yaw, 0, 0);
+					}
+
+					if (ImGui::Button("Copy This To Clipboard"))
+					{
+						CopyToClipboard(coords.GetTextInfo());
+					}
+
+					if (ImGui::Button("Remove This"))
+					{
+						std::swap(coords, savedCoordinates.back());
+						savedCoordinates.pop_back();
+					}
+				}
+				ImGui::PopID();
+			}
+		}
+
 		break;
+	}
 	case QuickSelection::FREECAM:
 	{
 		if (ImGui::Button("Toggle"))
@@ -78,28 +133,28 @@ void QuickPanel::InspectorLogic()
 
 		ImGui::Separator();
 
-		static std::string saveLabel = "CameraCoords";
+		static std::string saveLabel = "Camera Coords";
 		if (ImGui::Button("Save Coordinates"))
 		{
-			freecam.SaveCurrentCoordinates(saveLabel);
+			freecam.SaveCurrentCoordinates(saveLabel, savedCoordinates);
 		}
 		ImGui::InputText("Coordinate Label", &saveLabel);
 
-		if (!freecam.freeCamCoords.empty() && ImGui::Button("Copy All Coords to Clipboard"))
+		if (!savedCoordinates.empty() && ImGui::Button("Copy All Coords to Clipboard"))
 		{
-			CopyToClipboard(freecam.GetAllCoordsText());
+			CopyToClipboard(GetAllCoordsText());
 		}
 
-		if (!freecam.freeCamCoords.empty() && ImGui::CollapsingHeader("Saved Coordinates"))
+		if (!savedCoordinates.empty() && ImGui::CollapsingHeader("Saved Coordinates"))
 		{
 			if (ImGui::Button("Remove All"))
 			{
-				freecam.freeCamCoords.clear();
+				savedCoordinates.clear();
 			}
 
-			for (int i = 0; i < freecam.freeCamCoords.size(); i++)
+			for (int i = 0; i < savedCoordinates.size(); i++)
 			{
-				auto& coords = freecam.freeCamCoords[i];
+				auto& coords = savedCoordinates[i];
 				ImGui::PushID(i);
 				if (ImGui::CollapsingHeader(coords.title.c_str()))
 				{
@@ -115,6 +170,8 @@ void QuickPanel::InspectorLogic()
 
 						RUN_FLOWSCRIPT(fldCameraSetPos, coords.position.x, coords.position.y, coords.position.z);
 						RUN_FLOWSCRIPT(fldCameraSetRot, coords.qAngle.x, coords.qAngle.y, coords.qAngle.z, coords.qAngle.w);
+
+						freecam.angles = coords.angle;
 					}
 					if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip | ImGuiHoveredFlags_AllowWhenDisabled))
 						ImGui::SetTooltip("Only works when freecam is on.");
@@ -122,16 +179,13 @@ void QuickPanel::InspectorLogic()
 
 					if (ImGui::Button("Copy This To Clipboard"))
 					{
-						if (!CopyToClipboard(coords.GetTextInfo()))
-						{
-							continue;
-						}
+						CopyToClipboard(coords.GetTextInfo());
 					}
 
 					if (ImGui::Button("Remove This"))
 					{
-						std::swap(coords, freecam.freeCamCoords.back());
-						freecam.freeCamCoords.pop_back();
+						std::swap(coords, savedCoordinates.back());
+						savedCoordinates.pop_back();
 					}
 				}
 				ImGui::PopID();
@@ -140,21 +194,6 @@ void QuickPanel::InspectorLogic()
 
 		break;
 	}
-	case QuickSelection::TELEPORT:
-
-		ImReflect::Input("Teleport", teleport);
-
-		if (ImGui::Button("Teleport"))
-		{
-			Teleport(teleport);
-		}
-
-		if (ImGui::Button("Save Current Position"))
-		{
-			SavePosition();
-		}
-
-		break;
 	case QuickSelection::QUICK_FUNCTIONS:
 		ImReflect::Input("Event Parameters", eventParams);
 		if (ImGui::Button("Run Event"))
@@ -268,31 +307,6 @@ void QuickPanel::InspectorLogic()
 		break;
 	}
 	}
-}
-
-void QuickPanel::SavePosition()
-{
-	RUN_FLOWSCRIPT_BY_NAME(FLD_PC_GET_RESHND, 0);
-	float reshnd = GET_RETURN_INT();
-
-	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_GET_X_TRANSLATE, reshnd);
-	float x = GET_RETURN_FLOAT();
-	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_GET_Y_TRANSLATE, reshnd);
-	float y = GET_RETURN_FLOAT();
-	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_GET_Z_TRANSLATE, reshnd);
-	float z = GET_RETURN_FLOAT();
-
-	printf("[P5R Mod Editor] Saved Position: %f, %f, %f\n", x, y, z);
-	teleport = Vector3(x, y, z);
-}
-
-void QuickPanel::Teleport(const Vector3& position)
-{
-	RUN_FLOWSCRIPT_BY_NAME(FLD_PC_GET_RESHND, 0);
-	float reshnd = GET_RETURN_INT();
-
-	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_SET_TRANSLATE,reshnd, position.x, position.y, position.z, 0);
-	RUN_FLOWSCRIPT_BY_NAME(FLD_MODEL_SYNC_TRANSLATE,reshnd);
 }
 
 void QuickPanel::CallEvent()
@@ -475,8 +489,6 @@ void FreeCamSettings::FreeCamLogic()
 	POINT deltaMouseCoords;
 	deltaMouseCoords.x = newMouseCoords.x - lastMouseCoords.x;
 	deltaMouseCoords.y = newMouseCoords.y - lastMouseCoords.y;
-
-	lastMouseCoords = newMouseCoords;
 
 	SetCursorPos(centerX,centerY);
 

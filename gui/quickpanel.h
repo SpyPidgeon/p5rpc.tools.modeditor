@@ -3,18 +3,6 @@
 #include "flowscriptpanel.h"
 #include "vectormath.h"
 
-struct NoclipSettings
-{
-	bool enabled = false;
-	float speed = 500;
-
-	void NoclipKeyStateOn(const WPARAM wParam);
-	void NoclipKeyStateOff(const WPARAM wParam);
-	void NoclipLogic();
-	void Toggle();
-};
-IMGUI_REFLECT(NoclipSettings,speed);
-
 enum KeyPressed : unsigned short
 {
 	FORWARD = 1 << 0,
@@ -53,7 +41,7 @@ struct CallEventParams
 };
 IMGUI_REFLECT(CallEventParams, majorID, minorID);
 
-struct FreeCamCoord
+struct Coordinates
 {
 	std::string title = "CameraCoord";
 	Vector3 position;
@@ -69,11 +57,10 @@ struct FreeCamCoord
 		return textInfo;
 	}
 };
-IMGUI_REFLECT(FreeCamCoord, title, position, angle, qAngle);
+IMGUI_REFLECT(Coordinates, title, position, angle, qAngle);
 
 struct FreeCamSettings
 {
-	std::vector<FreeCamCoord> freeCamCoords;
 	bool enabled = false;
 	bool horizontalLock = false;
 	float speed = 300;
@@ -89,28 +76,17 @@ struct FreeCamSettings
 		static auto fldCameraLock = GET_FLOWSCRIPT(FLD_CAMERA_LOCK);
 		static auto fldCameraUnlock = GET_FLOWSCRIPT(FLD_CAMERA_UNLOCK);
 
-		static const auto fldCameraPitch = GET_FLOWSCRIPT(FLD_CAMERA_GET_PITCH);
-		static const auto fldCameraYaw = GET_FLOWSCRIPT(FLD_CAMERA_GET_YAW);
-		static const auto fldCameraRoll = GET_FLOWSCRIPT(FLD_CAMERA_GET_ROLL);
-
 		enabled = !enabled;
 
 		if (enabled)
 		{
 			RUN_FLOWSCRIPT(fldCameraLock);
-
-			RUN_FLOWSCRIPT(fldCameraYaw);
-			angles.yaw = GET_RETURN_FLOAT();
-			RUN_FLOWSCRIPT(fldCameraPitch);
-			angles.pitch = GET_RETURN_FLOAT();
-			RUN_FLOWSCRIPT(fldCameraRoll);
-			angles.roll = GET_RETURN_FLOAT();
 		}
 		else
 			RUN_FLOWSCRIPT(fldCameraUnlock);
 	}
 
-	void SaveCurrentCoordinates(const std::string& label)
+	void SaveCurrentCoordinates(const std::string& label, std::vector<Coordinates>& coordinates)
 	{
 		// Position
 		static const auto fldCameraPosX = GET_FLOWSCRIPT(FLD_CAMERA_GET_X_POS);
@@ -139,12 +115,7 @@ struct FreeCamSettings
 		RUN_FLOWSCRIPT(fldCameraPosZ);
 		position.z = GET_RETURN_FLOAT();
 
-		RUN_FLOWSCRIPT(fldCameraYaw);
-		angle.yaw = GET_RETURN_FLOAT();
-		RUN_FLOWSCRIPT(fldCameraPitch);
-		angle.pitch = GET_RETURN_FLOAT();
-		RUN_FLOWSCRIPT(fldCameraRoll);
-		angle.roll = GET_RETURN_FLOAT();
+		angle = angles;
 
 		RUN_FLOWSCRIPT(fldCameraRotX);
 		qAngle.x = GET_RETURN_FLOAT();
@@ -155,22 +126,56 @@ struct FreeCamSettings
 		RUN_FLOWSCRIPT(fldCameraRotW);
 		qAngle.w = GET_RETURN_FLOAT();
 
-		freeCamCoords.push_back({label, position, angle, qAngle });
-	}
-
-	std::string GetAllCoordsText()
-	{
-		std::string textInfo;
-
-		for (auto& coords : freeCamCoords)
-		{
-			textInfo += coords.GetTextInfo();
-		}
-
-		return textInfo;
+		coordinates.push_back({label, position, angle, qAngle });
 	}
 };
 IMGUI_REFLECT(FreeCamSettings, horizontalLock, speed, sensitivity, rollSpeed);
+
+struct NoclipSettings
+{
+	bool enabled = false;
+	float speed = 500;
+
+	void NoclipKeyStateOn(const WPARAM wParam);
+	void NoclipKeyStateOff(const WPARAM wParam);
+	void NoclipLogic();
+	void Toggle();
+
+	void SaveCurrentCoordinates(const std::string& label, std::vector<Coordinates>& coordinates)
+	{
+		static const auto fldPCGetReshnd = GET_FLOWSCRIPT(FLD_PC_GET_RESHND);
+
+		// Position
+		static const auto fldModelPosX = GET_FLOWSCRIPT(FLD_MODEL_GET_X_TRANSLATE);
+		static const auto fldModelPosY = GET_FLOWSCRIPT(FLD_MODEL_GET_Y_TRANSLATE);
+		static const auto fldModelPosZ = GET_FLOWSCRIPT(FLD_MODEL_GET_Z_TRANSLATE);
+
+		// Euler
+		static const auto fldModelYaw = GET_FLOWSCRIPT(FLD_MODEL_GET_Y_ROTATE);
+
+		RUN_FLOWSCRIPT(fldPCGetReshnd, 0);
+		int player = GET_RETURN_INT();
+
+		Vector3 position;
+		Euler angle;
+		Quaternion qAngle;
+
+		RUN_FLOWSCRIPT(fldModelPosX, (float)player);
+		position.x = GET_RETURN_FLOAT();
+		RUN_FLOWSCRIPT(fldModelPosY, (float)player);
+		position.y = GET_RETURN_FLOAT();
+		RUN_FLOWSCRIPT(fldModelPosZ, (float)player);
+		position.z = GET_RETURN_FLOAT();
+
+		RUN_FLOWSCRIPT(fldModelYaw, (float)player);
+		angle.yaw = GET_RETURN_FLOAT();
+
+		qAngle = Quaternion::EulerToQuat(angle.yaw, 0.0f, 0.0f);
+
+		coordinates.push_back({ label, position, angle, qAngle });
+	}
+};
+IMGUI_REFLECT(NoclipSettings, speed);
 
 class QuickPanel : Panel
 {
@@ -184,6 +189,20 @@ public:
 	//void ApplyChanges() override;
 	//void Refresh() override;
 
+	std::vector<Coordinates> savedCoordinates;
+
+	std::string GetAllCoordsText()
+	{
+		std::string textInfo;
+
+		for (auto& coords : savedCoordinates)
+		{
+			textInfo += coords.GetTextInfo();
+		}
+
+		return textInfo;
+	}
+
 	NoclipSettings noclip;
 	FreeCamSettings freecam;
 	uint16_t keyState;
@@ -192,8 +211,6 @@ public:
 	CallFieldParams fieldParams;
 	CallEventParams eventParams;
 
-	void SavePosition();
-	void Teleport(const Vector3& position);
 	float GetDeltaTime();
 
 	void CallEvent();
