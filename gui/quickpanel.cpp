@@ -251,12 +251,14 @@ void QuickPanel::InspectorLogic()
 		ImGui::Spacing();
 
 		ImGui::SeparatorText("Skill");
-		ImGui::TextWrapped("This only shuffles active skills, it skips passives and null skills and does not change the particle effects.");
+		ImGui::TextWrapped("This only shuffles active skills, it skips passives and null skills.");
 		ImGui::Spacing();
 
 		static bool skillsShuffled = false;
 		static std::vector<ActiveSkill> skillBytes(skillPanel->activeSkillArray.begin(),skillPanel->activeSkillArray.end());
 		static std::vector<SkillElement> elementBytes(skillPanel->skillElementArray.begin(), skillPanel->skillElementArray.end());
+
+		ImReflect::Input("Shuffle Effects", skillPanel->shuffleEffects);
 
 		if (ImGui::Button("Randomize Skills"))
 		{
@@ -272,6 +274,7 @@ void QuickPanel::InspectorLogic()
 				std::memcpy(skillPanel->activeSkillArray.data(), skillBytes.data(), sizeof(skillPanel->activeSkillArray));
 				std::memcpy(skillPanel->skillElementArray.data(), elementBytes.data(), sizeof(skillPanel->skillElementArray));
 				skillPanel->ApplyChanges();
+				skillPanel->shuffledPairs.clear();
 			}
 		}
 
@@ -505,10 +508,9 @@ void FreeCamSettings::FreeCamLogic()
 
 	angles.pitch = std::clamp(angles.pitch, -89.0f, 89.0f);
 
-	if (angles.yaw > 360.0f)
-		angles.yaw = -359.99f;
-	else if (angles.yaw < -360.0f)
-		angles.yaw = 359.99f;
+	angles.yaw = std::fmodf(angles.yaw, 360.0f);
+	if (angles.yaw < 0.0f)
+		angles.yaw += 360.0f;
 
 	if (keyState & to_underlying(KeyPressed::LEAN_LEFT))
 		angles.roll += rollSpeed * deltaTime;

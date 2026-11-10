@@ -10,6 +10,21 @@ enum class SkillTab
     TRAIT
 };
 
+typedef uintptr_t(__stdcall* SkillLogic)(uintptr_t param1, uintptr_t param2);
+
+struct SkillShufflePair
+{
+    int original;
+    int newID;
+};
+
+enum class ShuffleEffectEnum
+{
+    No,
+    Shuffle,
+    Randomize
+};
+
 class SkillPanel : SearchablePanel, Exportable
 {
 public:
@@ -36,6 +51,9 @@ public:
 
     std::array<ActiveSkill, ACTIVE_SKILL_SIZE> activeSkillArray;
     std::array<ActiveSkill, ACTIVE_SKILL_SIZE>* activeSkillsPTR;
+
+    std::vector<SkillShufflePair> shuffledPairs;
+    ShuffleEffectEnum shuffleEffects = ShuffleEffectEnum::No;
 
     std::array<std::string, SKILL_ELEMENT_SIZE> skillNames;
     std::array<SkillElement, SKILL_ELEMENT_SIZE> skillElementArray;

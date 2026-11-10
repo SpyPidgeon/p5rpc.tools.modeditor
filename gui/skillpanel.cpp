@@ -3,8 +3,46 @@
 #include <random>
 #include <algorithm>
 #include <utility>
+#include <detours.h>
 
 using std::format;
+
+SkillLogic oSkillLogic;
+
+uintptr_t SkillLogicHook(uintptr_t param1, uintptr_t param2)
+{
+	if (skillPanel->shuffleEffects == ShuffleEffectEnum::No)
+		return oSkillLogic(param1, param2);
+
+	short* effectID = (short*)(param1 + 0x79c8);
+	short newID = 0;
+
+	if (skillPanel->shuffleEffects == ShuffleEffectEnum::Shuffle)
+	{
+		for (auto& shuffle : skillPanel->shuffledPairs)
+		{
+			if (*effectID == shuffle.original)
+			{
+				newID = shuffle.newID;
+				break;
+			}
+		}
+	}
+
+	if (skillPanel->shuffleEffects == ShuffleEffectEnum::Randomize)
+	{
+		size_t hash = static_cast<size_t>(std::random_device{}());
+		std::mt19937 rng(hash);
+		std::uniform_int_distribution dist(1, 779);
+
+		newID = dist(rng);
+	}
+
+	if (newID != 0)
+		*effectID = newID;
+
+	return oSkillLogic(param1, param2);
+}
 
 // Skill Panel
 void SkillPanel::RenderLogic()
@@ -116,8 +154,16 @@ void SkillPanel::ScanValues()
 		}
 	}
 
-	currentDirectory = GetDLLPath("");
-	currentDirectory.pop_back();
+	pattern = "48 8D 05 ?? ?? ?? ?? 48 89 44 24 ?? 48 8D 54 24 ?? 33 C0 89 44 24 ??";
+	DWORD_PTR eplFunctionAddress = PatternScan(GetModuleHandle(NULL), pattern);
+	eplFunctionAddress = GetAddressFromGlobalRef(eplFunctionAddress);
+
+	oSkillLogic = (SkillLogic)eplFunctionAddress;
+
+	DetourTransactionBegin();
+	DetourUpdateThread(GetCurrentThread());
+	DetourAttach(&(PVOID&)oSkillLogic, SkillLogicHook);
+	DetourTransactionCommit();
 }
 
 void SkillPanel::InspectorLogic()
@@ -229,6 +275,8 @@ bool SkillPanel::SkillFilter(const int id)
 
 void SkillPanel::RandomizeSkills(const size_t seed)
 {
+	shuffledPairs.clear();
+
 	std::mt19937 rng(seed);
 
 	std::vector<int> filteredIndexes;
@@ -252,6 +300,8 @@ void SkillPanel::RandomizeSkills(const size_t seed)
 
 	for (int i = 0; i < filteredIndexes.size(); i++)
 	{
+		shuffledPairs.push_back({preShuffle[i], filteredIndexes[i]});
+
 		auto& n = activeSkillArray[filteredIndexes[i]];
 		auto& n2 = skillElementArray[filteredIndexes[i]];
 		auto& o = copySkill[preShuffle[i]];
