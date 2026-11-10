@@ -505,6 +505,11 @@ void FreeCamSettings::FreeCamLogic()
 
 	angles.pitch = std::clamp(angles.pitch, -89.0f, 89.0f);
 
+	if (angles.yaw > 360.0f)
+		angles.yaw = -359.99f;
+	else if (angles.yaw < -360.0f)
+		angles.yaw = 359.99f;
+
 	if (keyState & to_underlying(KeyPressed::LEAN_LEFT))
 		angles.roll += rollSpeed * deltaTime;
 	if (keyState & to_underlying(KeyPressed::LEAN_RIGHT))

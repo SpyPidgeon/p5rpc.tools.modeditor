@@ -185,7 +185,7 @@ void SkillPanel::InspectorLogic()
 
 		if (ImGui::Button("Apply To This"))
 		{
-			technicalPtr->at(selectedIndex) = technicalArray.at(selectedIndex);
+			traitsPtr->at(selectedIndex) = traitsArray.at(selectedIndex);
 		}
 
 		break;
