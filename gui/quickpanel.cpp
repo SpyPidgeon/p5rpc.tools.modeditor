@@ -75,7 +75,8 @@ void QuickPanel::InspectorLogic()
 			{
 				savedCoordinates.clear();
 			}
-
+			ImGui::Separator();
+			ImGui::BeginChild("##childBox");
 			for (int i = 0; i < savedCoordinates.size(); i++)
 			{
 				auto& coords = savedCoordinates[i];
@@ -113,8 +114,9 @@ void QuickPanel::InspectorLogic()
 				}
 				ImGui::PopID();
 			}
-		}
 
+			ImGui::EndChild();
+		}
 		break;
 	}
 	case QuickSelection::FREECAM:
@@ -151,7 +153,8 @@ void QuickPanel::InspectorLogic()
 			{
 				savedCoordinates.clear();
 			}
-
+			ImGui::Separator();
+			ImGui::BeginChild("##childBox");
 			for (int i = 0; i < savedCoordinates.size(); i++)
 			{
 				auto& coords = savedCoordinates[i];
@@ -190,6 +193,8 @@ void QuickPanel::InspectorLogic()
 				}
 				ImGui::PopID();
 			}
+
+			ImGui::EndChild();
 		}
 
 		break;
