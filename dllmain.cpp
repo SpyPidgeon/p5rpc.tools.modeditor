@@ -41,11 +41,8 @@ HWND GetGameWindow()
             return windowHandle;
     }
 
-    if (windowHandle == NULL)
-    {
-        printf("[P5R Mod Editor] No valid window string found! Defaulting to GetForegroundWindow.");
-        return GetForegroundWindow();
-    }
+    printf("[P5R Mod Editor] No valid window string found! Defaulting to GetForegroundWindow.");
+    return GetForegroundWindow();
 }
 
 void InitScan()

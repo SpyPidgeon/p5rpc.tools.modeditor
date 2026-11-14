@@ -29,11 +29,11 @@ uintptr_t SkillLogicHook(uintptr_t param1, uintptr_t param2)
 		}
 	}
 
-	if (skillPanel->shuffleEffects == ShuffleEffectEnum::Randomize)
+	if (skillPanel->shuffleEffects == ShuffleEffectEnum::Randomize && *effectID < 779)
 	{
 		size_t hash = static_cast<size_t>(std::random_device{}());
 		std::mt19937 rng(hash);
-		std::uniform_int_distribution dist(1, 779);
+		std::uniform_int_distribution dist(1, 799);
 
 		newID = dist(rng);
 	}

@@ -69,7 +69,7 @@ struct std::formatter<Vector3> : std::formatter<std::string>
 {
 	auto format(const Vector3& vec, std::format_context& ctx) const
 	{
-		return std::format_to(ctx.out(), "X: {}, Y: {}, Z: {}", vec.x, vec.y, vec.z);
+		return std::format_to(ctx.out(), "X: {:.6f}, Y: {:.6f}, Z: {:.6f}", vec.x, vec.y, vec.z);
 	}
 };
 
@@ -108,7 +108,7 @@ struct std::formatter<Quaternion> : std::formatter<std::string>
 {
 	auto format(const Quaternion& q, std::format_context& ctx) const
 	{
-		return std::format_to(ctx.out(), "X: {}, Y: {}, Z: {}, W: {}", q.x, q.y, q.z, q.w);
+		return std::format_to(ctx.out(), "X: {:.6f}, Y: {:.6f}, Z: {:.6f}, W: {:.6f}", q.x, q.y, q.z, q.w);
 	}
 };
 
@@ -129,6 +129,24 @@ struct Euler
 
 		return term1 + term2 + term3;
 	}
+
+	static Euler QuatToYXZRight(const Quaternion& q)
+	{
+		float t0 = 2.0f * (q.w * q.x - q.y * q.z);
+		t0 = std::clamp(t0, -1.0f, 1.0f);
+		float xPitch = std::asinf(t0);
+
+		float t1 = 2.0f * (q.w * q.y + q.z * q.x);
+		float t2 = 1.0f - 2.0f * (q.x * q.x + q.y * q.y);
+		float yYaw = std::atan2f(-t1, -t2);
+
+		float t3 = 2.0f * (q.w * q.z + q.x * q.y);
+		float t4 = 1.0f - 2.0f * (q.y * q.y + q.z * q.z);
+		float zRoll = std::atan2f(t3, t4);
+
+		constexpr float Deg = 180.0f / IM_PI;
+		return { yYaw * Deg, xPitch * Deg, zRoll * Deg };
+	}
 };
 IMGUI_REFLECT(Euler, yaw, pitch, roll);
 
@@ -137,6 +155,6 @@ struct std::formatter<Euler> : std::formatter<std::string>
 {
 	auto format(const Euler& a, std::format_context& ctx) const
 	{
-		return std::format_to(ctx.out(), "Yaw: {}, Pitch: {}, Roll: {}", a.yaw, a.pitch, a.roll);
+		return std::format_to(ctx.out(), "Yaw: {:.6f}, Pitch: {:.6f}, Roll: {:.6f}", a.yaw, a.pitch, a.roll);
 	}
 };

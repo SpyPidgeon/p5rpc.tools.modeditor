@@ -97,7 +97,7 @@ void QuickPanel::InspectorLogic()
 						player = GET_RETURN_INT();
 
 						RUN_FLOWSCRIPT(fldModelSetTranslate, (float)player, coords.position.x, coords.position.y, coords.position.z, 0);
-						RUN_FLOWSCRIPT(fldModelSetRotate, (float)player, 0, coords.angle.yaw, 0, 0);
+						RUN_FLOWSCRIPT(fldModelSetRotate, (float)player, coords.angleRight.pitch, coords.angleRight.yaw, coords.angleRight.roll, 0);
 					}
 
 					if (ImGui::Button("Copy This To Clipboard"))

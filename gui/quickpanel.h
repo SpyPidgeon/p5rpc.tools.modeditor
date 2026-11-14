@@ -43,21 +43,22 @@ IMGUI_REFLECT(CallEventParams, majorID, minorID);
 
 struct Coordinates
 {
-	std::string title = "CameraCoord";
+	std::string title;
 	Vector3 position;
 	Euler angle;
+	Euler angleRight;
 	Quaternion qAngle;
 
 	std::string GetTextInfo()
 	{
 		std::string textInfo;
-		textInfo = std::format("Title: {}\nPosition: {}\nEuler Angle: {}\nQuaternion Angle {}\n--------------------------------------------------------------------------------------\r\n"
-			,title, position, angle, qAngle);
+		textInfo = std::format("Title: {}\nPosition: {}\nEuler Angle: {}\nEuler Right Angle: {}\nQuaternion Angle {}\n--------------------------------------------------------------------------------------\r\n"
+			,title, position, angle, angleRight, qAngle);
 
 		return textInfo;
 	}
 };
-IMGUI_REFLECT(Coordinates, title, position, angle, qAngle);
+IMGUI_REFLECT(Coordinates, title, position, angle, angleRight, qAngle);
 
 struct FreeCamSettings
 {
@@ -106,6 +107,7 @@ struct FreeCamSettings
 
 		Vector3 position;
 		Euler angle;
+		Euler angleRight;
 		Quaternion qAngle;
 
 		RUN_FLOWSCRIPT(fldCameraPosX);
@@ -126,7 +128,9 @@ struct FreeCamSettings
 		RUN_FLOWSCRIPT(fldCameraRotW);
 		qAngle.w = GET_RETURN_FLOAT();
 
-		coordinates.push_back({label, position, angle, qAngle });
+		angleRight = Euler::QuatToYXZRight(qAngle);
+
+		coordinates.push_back({label, position, angle, angleRight, qAngle });
 	}
 };
 IMGUI_REFLECT(FreeCamSettings, horizontalLock, speed, sensitivity, rollSpeed);
@@ -151,13 +155,14 @@ struct NoclipSettings
 		static const auto fldModelPosZ = GET_FLOWSCRIPT(FLD_MODEL_GET_Z_TRANSLATE);
 
 		// Euler
-		static const auto fldModelYaw = GET_FLOWSCRIPT(FLD_MODEL_GET_Y_ROTATE);
+		static const auto fldModelPitch = GET_FLOWSCRIPT(FLD_MODEL_GET_Y_ROTATE);
 
 		RUN_FLOWSCRIPT(fldPCGetReshnd, 0);
 		int player = GET_RETURN_INT();
 
 		Vector3 position;
-		Euler angle;
+		Euler angle = { 0, 0, 0 };
+		Euler angleRight;
 		Quaternion qAngle;
 
 		RUN_FLOWSCRIPT(fldModelPosX, (float)player);
@@ -167,12 +172,12 @@ struct NoclipSettings
 		RUN_FLOWSCRIPT(fldModelPosZ, (float)player);
 		position.z = GET_RETURN_FLOAT();
 
-		RUN_FLOWSCRIPT(fldModelYaw, (float)player);
-		angle.yaw = GET_RETURN_FLOAT();
+		RUN_FLOWSCRIPT(fldModelPitch, (float)player);
+		angleRight.yaw = GET_RETURN_FLOAT();
 
 		qAngle = Quaternion::EulerToQuat(angle.yaw, 0.0f, 0.0f);
 
-		coordinates.push_back({ label, position, angle, qAngle });
+		coordinates.push_back({ label, position, angle, angleRight, qAngle });
 	}
 };
 IMGUI_REFLECT(NoclipSettings, speed);
